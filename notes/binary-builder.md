@@ -46,12 +46,14 @@ b.addBits(0b011, 3) // String
 b.addBits(0b00011, 5) // String length 3
 // b.bytes = [0b0001_0010, 0b0001_0110, 0b0011_0000]; currByteLen = 4 ; currByte = 2
 b.addBytes([]byte("foo")) // "foo" = 0b01100110 0b01101111 0b01101111 
+
 // b.bytes = [0b0001_0010, 0b0001_0110, 0b0011_0110, 0b0110_0110, 0b1111_0110, 0b1111_0000]; currByteLen = 4 ; currByte = 6
 b.addBits(0b011, 3) // String
 // b.bytes = [0b0001_0010, 0b0001_0110, 0b0011_0110, 0b0110_0110, 0b1111_0110, 0b1111_0110]; currByteLen = 7 ; currByte = 6
 b.addBits(0b00011, 5) // String length 3
 // b.bytes = [0b0001_0010, 0b0001_0110, 0b0011_0110, 0b0110_0110, 0b1111_0110, 0b1111_0110, 0b0011_0000]; currByteLen = 4 ; currByte = 7
 b.addBytes([]byte("bar")) // "bar" = 0b01100010 0b01100001 0b01110010 
+0b0001_0010, 0b0001_0110, 0b0011_0110, 0b0110_0110, 0b1111_0110, 0b1111_0110, 0b0011_0110, 0b0010_0110, 0b0001_0111, 0b0010_0000
 // b.bytes = [0b0001_0010, 0b0001_0110, 0b0011_0110, 0b0110_0110, 0b1111_0110, 0b1111_0110, 0b0011_0110, 0b0010_0110, 0b0001_0111, 0b0010_0000]; currByteLen = 4 ; currByte = 10
 
 b.WriteTo(someFileWriter)
