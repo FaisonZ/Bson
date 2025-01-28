@@ -21,7 +21,7 @@ func runBitBuilder() {
 	fmt.Println(b)
 }
 
-func main() {
+func runEncodeJson() {
 	var jsonBlob = []byte(`[{"foo":"bar"}, "foobar", true, false, null]`)
 
 	bb := bit.NewBitBuilder()
@@ -32,5 +32,9 @@ func main() {
 	}
 
 	fmt.Println(bb)
+}
+
+func main() {
+	runEncodeJson()
 	runBitBuilder()
 }
