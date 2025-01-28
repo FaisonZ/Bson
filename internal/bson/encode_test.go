@@ -38,3 +38,34 @@ func TestEncodeJson(t *testing.T) {
 		t.Errorf("Expected: %08b\n Received: %08b", expected, got)
 	}
 }
+
+func TestEncodeBoolean(t *testing.T) {
+	expectedFalse := []byte{
+		0b1010_0000,
+	}
+	expectedTrue := []byte{
+		0b1011_0000,
+	}
+
+	bb := bit.NewBitBuilder()
+	got := encodeBoolean(false, bb)
+
+	if res := bytes.Compare(expectedFalse, bb.Bytes); res != 0 {
+		t.Errorf(
+			"False test expected:\n%08b\nReceived:\n%08b",
+			expectedFalse,
+			got,
+		)
+	}
+
+	bb = bit.NewBitBuilder()
+	got = encodeBoolean(true, bb)
+
+	if res := bytes.Compare(expectedTrue, bb.Bytes); res != 0 {
+		t.Errorf(
+			"True test expected:\n%08b\nReceived:\n%08b",
+			expectedFalse,
+			got,
+		)
+	}
+}
