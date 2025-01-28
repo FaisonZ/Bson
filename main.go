@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/FaisonZ/bson/internal/bit"
@@ -23,26 +22,15 @@ func runBitBuilder() {
 }
 
 func main() {
-	var jsonBlob = []byte(`[{
-    "foo": "bar"
-},
-"foo",
-true,
-false
-]`)
+	var jsonBlob = []byte(`[{"foo":"bar"}, "foobar", true, false, null]`)
 
-	var data any
 	bb := bit.NewBitBuilder()
-
-	err := json.Unmarshal(jsonBlob, &data)
-
+	err := bson.EncodeJson(jsonBlob, bb)
 	if err != nil {
-		fmt.Printf("Unmarshal error: %q", err)
+		fmt.Printf("Bson Encoding error: %q\n", err)
 		return
 	}
 
-	bson.EncodeJson(data, bb)
 	fmt.Println(bb)
-
 	runBitBuilder()
 }

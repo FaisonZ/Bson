@@ -6,25 +6,25 @@ import (
 )
 
 type BitBuilder struct {
-	bytes       []byte
+	Bytes       []byte
 	currBytePos int
 	currByte    int
 }
 
 func NewBitBuilder() *BitBuilder {
 	bb := &BitBuilder{
-		bytes:       make([]byte, 0, 10),
+		Bytes:       make([]byte, 0, 10),
 		currBytePos: 0,
 		currByte:    0,
 	}
 
-	bb.bytes = append(bb.bytes, 0b0000_0000)
+	bb.Bytes = append(bb.Bytes, 0b0000_0000)
 
 	return bb
 }
 
 func (bb *BitBuilder) grow() {
-	bb.bytes = append(bb.bytes, 0b0000_0000)
+	bb.Bytes = append(bb.Bytes, 0b0000_0000)
 	bb.currByte += 1
 	bb.currBytePos = 0
 }
@@ -35,32 +35,34 @@ func (bb *BitBuilder) AddBits(bits byte, len int) error {
 	}
 
 	shift := 8 - bb.currBytePos - len
-	fmt.Printf(
-		"currPos: %d ; len: %d ; shift: %d\ninput:   %08b\n",
-		bb.currBytePos,
-		len,
-		shift,
-		bits,
-	)
+	/*
+		fmt.Printf(
+			"currPos: %d ; len: %d ; shift: %d\ninput:   %08b\n",
+			bb.currBytePos,
+			len,
+			shift,
+			bits,
+		)
+	*/
 
 	if shift < 0 {
 		shiftedBits := bits >> -shift
-		fmt.Printf("shifted: %08b\n", shiftedBits)
-		bb.bytes[bb.currByte] |= shiftedBits
+		// fmt.Printf("shifted: %08b\n", shiftedBits)
+		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.grow()
 
 		shiftedBits = bits << (8 + shift)
-		fmt.Printf("shifted: %08b\n", shiftedBits)
-		bb.bytes[bb.currByte] |= shiftedBits
+		// fmt.Printf("shifted: %08b\n", shiftedBits)
+		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.currBytePos += -shift
 	} else {
 		shiftedBits := bits << shift
-		fmt.Printf("shifted: %08b\n", shiftedBits)
-		bb.bytes[bb.currByte] |= shiftedBits
+		// fmt.Printf("shifted: %08b\n", shiftedBits)
+		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.currBytePos += len
 	}
 
-	fmt.Println(bb)
+	// fmt.Println(bb)
 	return nil
 }
 
@@ -73,10 +75,10 @@ func (bb *BitBuilder) AddBytes(bs []byte) error {
 }
 
 func (bb *BitBuilder) String() string {
-	return fmt.Sprintf("%08b", bb.bytes)
+	return fmt.Sprintf("%08b", bb.Bytes)
 }
 
 func (bb *BitBuilder) WriteTo(w io.Writer) (n int64, err error) {
-	nn, err := w.Write(bb.bytes)
+	nn, err := w.Write(bb.Bytes)
 	return int64(nn), err
 }

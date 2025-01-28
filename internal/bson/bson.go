@@ -1,6 +1,11 @@
 package bson
 
-import "github.com/FaisonZ/bson/internal/bit"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/FaisonZ/bson/internal/bit"
+)
 
 const (
 	BSON_VERSION  = 0b0001
@@ -14,7 +19,14 @@ const (
 	TRUE          = 0b1
 )
 
-func EncodeJson(a any, bb *bit.BitBuilder) error {
+func EncodeJson(j []byte, bb *bit.BitBuilder) error {
+	var a any
+	err := json.Unmarshal(j, &a)
+
+	if err != nil {
+		return err
+	}
+
 	writeVersion(bb)
 	encodeValue(a, bb)
 	return nil
@@ -54,6 +66,10 @@ func encodeValue(a any, bb *bit.BitBuilder) error {
 		encodeArray(ar, bb)
 	} else if b, ok := a.(bool); ok {
 		encodeBoolean(b, bb)
+	} else if n, ok := a.(float64); ok {
+		fmt.Printf("I haven't implemented numbers yet: %f\n", n)
+	} else if a == nil {
+		encodeNull(bb)
 	}
 
 	return nil
@@ -63,6 +79,11 @@ func encodeString(s string, bb *bit.BitBuilder) error {
 	writeTokenWithLength(STRING_TOKEN, uint8(len(s)), bb)
 	writeString(s, bb)
 
+	return nil
+}
+
+func encodeNull(bb *bit.BitBuilder) error {
+	writeToken(NULL_TOKEN, bb)
 	return nil
 }
 

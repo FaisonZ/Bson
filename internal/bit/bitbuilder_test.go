@@ -30,7 +30,7 @@ func TestBitBuilder(t *testing.T) {
 	b.AddBits(0b00011, 5)
 	b.AddBytes([]byte("bar"))
 
-	if res := bytes.Compare(expected, b.bytes); res != 0 {
-		t.Errorf("Expected: %08b\n Received: %08b", expected, b.bytes)
+	if res := bytes.Compare(expected, b.Bytes); res != 0 {
+		t.Errorf("Expected: %08b\n Received: %08b", expected, b.Bytes)
 	}
 }
