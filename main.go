@@ -36,7 +36,7 @@ func runEncodeJson() {
 	fmt.Println(bb)
 }
 
-func checkReduction(iao InsAndOuts) {
+func runCheckCmd(iao InsAndOuts) {
 	jsonBytes, err := io.ReadAll(iao.in)
 	if err != nil {
 		fmt.Fprintf(iao.err, "Error reading JSON: %q\n", err)
@@ -57,6 +57,27 @@ func checkReduction(iao InsAndOuts) {
 		len(bb.Bytes),
 	)
 	fmt.Fprintf(iao.out, "diff: %d\n", len(jsonBytes)-len(bb.Bytes))
+}
+
+func runEncodeCmd(iao InsAndOuts) {
+	jsonBytes, err := io.ReadAll(iao.in)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error reading JSON: %q\n", err)
+		return
+	}
+
+	bb := bit.NewBitBuilder()
+	err = bson.EncodeJson(jsonBytes, bb)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error encoding: %q\n", err)
+		return
+	}
+
+	_, err = bb.WriteTo(iao.out)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error writing bson to target: %q\n", err)
+		return
+	}
 }
 
 func getCommand(args []string) (cmd string, err error) {
@@ -98,8 +119,9 @@ func main() {
 
 	switch cmd {
 	case "encode":
+		runEncodeCmd(insOuts)
 	case "decode":
 	case "check":
-		checkReduction(insOuts)
+		runCheckCmd(insOuts)
 	}
 }
