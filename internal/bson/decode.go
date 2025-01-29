@@ -72,7 +72,11 @@ func (d *Decoder) decodeValue() (any, error) {
 		return d.decodeBoolean()
 	}
 
-	return nil, fmt.Errorf("Invalid value token: %03b", tokenBits)
+	return nil, fmt.Errorf(
+		"Invalid value token: %03b at %s",
+		tokenBits,
+		d.br.Debug(3),
+	)
 }
 
 func (d *Decoder) decodeLength() (int, error) {

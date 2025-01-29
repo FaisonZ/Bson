@@ -3,6 +3,7 @@ package bit
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 type BitReader struct {
@@ -17,6 +18,39 @@ func NewBitReader(bs []byte) *BitReader {
 		bytePos: 0,
 		bitPos:  0,
 	}
+}
+
+func (br *BitReader) Debug(l int) string {
+	var sb strings.Builder
+
+	showPrev := (br.bitPos-l) < 0 && br.bytePos > 0
+
+	startingByte := br.bytePos
+	startingBit := br.bitPos - l + 1
+	if showPrev {
+		startingByte -= 1
+		startingBit += 8
+	}
+
+	sb.WriteString(
+		fmt.Sprintf(
+			"%d bits starting at byte: %d, bit %d [ ",
+			l,
+			startingByte+1,
+			startingBit,
+		),
+	)
+
+	if showPrev {
+		sb.WriteString(fmt.Sprintf("%08b, ", br.bytes[br.bytePos-1]))
+	}
+
+	sb.WriteString(fmt.Sprintf("%08b", br.bytes[br.bytePos]))
+	sb.WriteString(" ]")
+
+	fmt.Printf("\n%s\n", sb.String())
+
+	return sb.String()
 }
 
 func (br *BitReader) GetBits(l int) (byte, error) {
