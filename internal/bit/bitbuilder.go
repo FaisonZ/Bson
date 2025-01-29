@@ -3,6 +3,7 @@ package bit
 import (
 	"fmt"
 	"io"
+	"math"
 )
 
 type BitBuilder struct {
@@ -34,21 +35,22 @@ func (bb *BitBuilder) AddBits(bits byte, len int) error {
 		bb.grow()
 	}
 
-	shift := 8 - bb.currBytePos - len
+	bitsLeftInByte := 8 - bb.currBytePos
+	shift := bitsLeftInByte - len
 
 	if shift < 0 {
-		shiftedBits := bits >> -shift
-		bb.Bytes[bb.currByte] |= shiftedBits
-		bb.grow()
+		leftLen := len + shift
+		rightLen := -shift
+		rightMask := byte(math.Pow(2, float64(rightLen))) - 1
 
-		shiftedBits = bits << (8 + shift)
-		bb.Bytes[bb.currByte] |= shiftedBits
-		bb.currBytePos += -shift
-	} else {
-		shiftedBits := bits << shift
-		bb.Bytes[bb.currByte] |= shiftedBits
-		bb.currBytePos += len
+		bb.AddBits(bits>>(-shift), leftLen)
+		bb.AddBits(bits&rightMask, rightLen)
+		return nil
 	}
+
+	shiftedBits := bits << shift
+	bb.Bytes[bb.currByte] |= shiftedBits
+	bb.currBytePos += len
 
 	return nil
 }
