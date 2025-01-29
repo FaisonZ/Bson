@@ -54,3 +54,14 @@ func (br *BitReader) GetBits(l int) (byte, error) {
 		return b, nil
 	}
 }
+
+func (br *BitReader) GetBytes(l int) ([]byte, error) {
+	b := make([]byte, 0, l)
+
+	for i := 0; i < l; i++ {
+		c, _ := br.GetBits(8)
+		b = append(b, c)
+	}
+
+	return b, nil
+}
