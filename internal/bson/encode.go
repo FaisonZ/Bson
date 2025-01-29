@@ -24,7 +24,7 @@ func EncodeJson(j []byte, bb *bit.BitBuilder) error {
 	err := json.Unmarshal(j, &a)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON error: %v", err)
 	}
 
 	writeVersion(bb)

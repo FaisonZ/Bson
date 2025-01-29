@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -80,6 +81,32 @@ func runEncodeCmd(iao InsAndOuts) {
 	}
 }
 
+func runDecodeCmd(iao InsAndOuts) {
+	bsonBytes, err := io.ReadAll(iao.in)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error reading Bson: %q\n", err)
+		return
+	}
+
+	jsonDecoded, err := bson.Decode(bsonBytes)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error decoding: %q\n", err)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(jsonDecoded)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error marshalling JSON: %q\n", err)
+		return
+	}
+
+	_, err = iao.out.Write(jsonBytes)
+	if err != nil {
+		fmt.Fprintf(iao.err, "Error writing json to target: %q\n", err)
+		return
+	}
+}
+
 func getCommand(args []string) (cmd string, err error) {
 	if len(args) == 2 {
 		switch args[1] {
@@ -106,7 +133,7 @@ type InsAndOuts struct {
 func main() {
 	cmd, err := getCommand(os.Args)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s", err)
+		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 		return
 	}
@@ -121,6 +148,7 @@ func main() {
 	case "encode":
 		runEncodeCmd(insOuts)
 	case "decode":
+		runDecodeCmd(insOuts)
 	case "check":
 		runCheckCmd(insOuts)
 	}
