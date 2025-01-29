@@ -22,7 +22,8 @@ func runBitBuilder() {
 }
 
 func runEncodeJson() {
-	var jsonBlob = []byte(`[{"foo":"bar"}, "foobar", true, false, null]`)
+	//var jsonBlob = []byte(`[{"foo":"bar"}, "foobar", true, false, null]`)
+	var jsonBlob = []byte(`{"bing": null, "baz": true, "bar": false}`)
 
 	bb := bit.NewBitBuilder()
 	err := bson.EncodeJson(jsonBlob, bb)

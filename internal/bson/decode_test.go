@@ -91,3 +91,50 @@ func TestDecode(t *testing.T) {
 		t.Errorf("bing should be nil")
 	}
 }
+
+func TestDecode2(t *testing.T) {
+	v, err := Decode([]byte{
+		0b00010010, 0b00110110, 0b01000110, 0b00100110, 0b10010110, 0b11100110, 0b01111100, 0b11000110, 0b11000100, 0b11000010, 0b11110101, 0b01101100, 0b0110_1100, 0b0100_1100, 0b0010_1110, 0b0101_0100,
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	typ := reflect.TypeOf(v)
+	fmt.Printf("%v\n", typ)
+	o, ok := v.(map[string]any)
+	if !ok {
+		t.Errorf("Failed to decode the root object")
+	} else if len(o) == 0 {
+		t.Errorf("Should not be an empty object")
+	}
+
+	val, has := o["bing"]
+	if !has {
+		t.Errorf("Does not have key \"bar\"")
+	}
+	if val != nil {
+		t.Errorf("bing should be nil")
+	}
+
+	val, has = o["baz"]
+	if !has {
+		t.Errorf("Does not have key \"baz\"")
+	}
+	if b, ok := val.(bool); !ok {
+		t.Errorf("baz should be a boolean")
+	} else if !b {
+		t.Errorf("baz should be true, but was %v", b)
+	}
+
+	val, has = o["bar"]
+	if !has {
+		t.Errorf("Does not have key \"bar\"")
+	}
+	if b, ok := val.(bool); !ok {
+		t.Errorf("bar should be a boolean")
+	} else if b {
+		t.Errorf("bar should be false, but was %v", b)
+	}
+}

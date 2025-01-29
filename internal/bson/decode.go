@@ -61,12 +61,16 @@ func (d *Decoder) decodeValue() (any, error) {
 		return nil, err
 	}
 
-	if tokenBits == OBJECT_TOKEN {
+	switch tokenBits {
+	case OBJECT_TOKEN:
 		return d.decodeObject()
-	} else if tokenBits == STRING_TOKEN {
+	case STRING_TOKEN:
 		return d.decodeString()
-	} else if tokenBits == NULL_TOKEN {
+	case NULL_TOKEN:
+		fmt.Printf("Got Null\n")
 		return nil, nil
+	case BOOLEAN_TOKEN:
+		return d.decodeBoolean()
 	}
 
 	return nil, fmt.Errorf("Invalid value token: %03b", tokenBits)
@@ -88,7 +92,8 @@ func (d *Decoder) decodeObject() (any, error) {
 	o := make(map[string]any, l)
 
 	for i := 0; i < l; i++ {
-		d.br.GetBits(3)
+		b, _ := d.br.GetBits(3)
+		fmt.Printf("String token for key: %03b\n", b)
 		key, _ := d.decodeString()
 		fmt.Printf("Key: %s\n", key)
 		o[key], err = d.decodeValue()
@@ -114,6 +119,15 @@ func (d *Decoder) decodeString() (string, error) {
 	}
 
 	return string(sbytes), nil
+}
+
+func (d *Decoder) decodeBoolean() (bool, error) {
+	l, err := d.br.GetBits(1)
+	if err != nil {
+		return false, err
+	}
+
+	return l == TRUE, nil
 }
 
 func Decode(bs []byte) (any, error) {
