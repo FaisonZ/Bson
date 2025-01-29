@@ -65,9 +65,11 @@ func (d *Decoder) decodeValue() (any, error) {
 		return d.decodeObject()
 	} else if tokenBits == STRING_TOKEN {
 		return d.decodeString()
+	} else if tokenBits == NULL_TOKEN {
+		return nil, nil
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("Invalid value token: %03b", tokenBits)
 }
 
 func (d *Decoder) decodeLength() (int, error) {
@@ -89,7 +91,11 @@ func (d *Decoder) decodeObject() (any, error) {
 		d.br.GetBits(3)
 		key, _ := d.decodeString()
 		fmt.Printf("Key: %s\n", key)
-		o[key], _ = d.decodeValue()
+		o[key], err = d.decodeValue()
+
+		if err != nil {
+			return o, err
+		}
 	}
 
 	return o, nil

@@ -26,7 +26,7 @@ func TestDecodeVersion(t *testing.T) {
 func TestDecode(t *testing.T) {
 	v, err := Decode([]byte{
 		0b0001_0010,
-		0b0010_0110,
+		0b0011_0110,
 		0b0011_0110,
 		0b0110_0110,
 		0b1111_0110,
@@ -42,7 +42,12 @@ func TestDecode(t *testing.T) {
 		0b0011_0110,
 		0b0110_0110,
 		0b1111_0110,
-		0b1111_0000,
+		0b1111_0110,
+		0b0100_0110,
+		0b0010_0110,
+		0b1001_0110,
+		0b1110_0110,
+		0b0111_1100,
 	})
 
 	if err != nil {
@@ -76,5 +81,13 @@ func TestDecode(t *testing.T) {
 		t.Errorf("bar should contain a string")
 	} else if str != "foo" {
 		t.Errorf("bar should contain string \"foo\", but has %q", str)
+	}
+
+	val, has = o["bing"]
+	if !has {
+		t.Errorf("Does not have key \"bar\"")
+	}
+	if val != nil {
+		t.Errorf("bing should be nil")
 	}
 }
