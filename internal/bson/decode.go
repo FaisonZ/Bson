@@ -64,6 +64,8 @@ func (d *Decoder) decodeValue() (any, error) {
 	switch tokenBits {
 	case OBJECT_TOKEN:
 		return d.decodeObject()
+	case ARRAY_TOKEN:
+		return d.decodeArray()
 	case STRING_TOKEN:
 		return d.decodeString()
 	case NULL_TOKEN:
@@ -101,6 +103,27 @@ func (d *Decoder) decodeObject() (any, error) {
 		if err != nil {
 			return o, err
 		}
+	}
+
+	return o, nil
+}
+
+func (d *Decoder) decodeArray() (any, error) {
+	l, err := d.decodeLength()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Array len: %d\n", l)
+	o := make([]any, 0, l)
+
+	for i := 0; i < l; i++ {
+		val, err := d.decodeValue()
+		if err != nil {
+			return o, err
+		}
+		o = append(o, val)
 	}
 
 	return o, nil

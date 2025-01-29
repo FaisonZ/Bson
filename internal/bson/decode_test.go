@@ -138,3 +138,59 @@ func TestDecode2(t *testing.T) {
 		t.Errorf("bar should be false, but was %v", b)
 	}
 }
+
+func TestDecode3(t *testing.T) {
+	v, err := Decode([]byte{
+		0b0001_0100,
+		0b0101_0110,
+		0b0001_0110,
+		0b0001_1100,
+		0b1100_0010,
+		0b1100_0101,
+		0b0110_1100,
+		0b0100_1100,
+		0b0010_1100,
+		0b0100_0000,
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	typ := reflect.TypeOf(v)
+	fmt.Printf("%v\n", typ)
+	a, ok := v.([]any)
+	if !ok {
+		t.Errorf("Failed to decode the root array")
+	} else if len(a) == 0 {
+		t.Errorf("Should not be an empty array")
+	}
+
+	if val, ok := a[0].(string); !ok {
+		t.Errorf("first element should be a string")
+	} else if val != "a" {
+		t.Errorf("fist element should be \"a\", was %q", val)
+	}
+
+	if a[1] != nil {
+		t.Errorf("second element should null")
+	}
+
+	if val, ok := a[2].(string); !ok {
+		t.Errorf("third element should be a string")
+	} else if val != "b" {
+		t.Errorf("third element should be \"b\", was %q", val)
+	}
+
+	if val, ok := a[3].(bool); !ok {
+		t.Errorf("fourth element should be a boolean")
+	} else if val != true {
+		t.Errorf("fourth element should be true, was %v", val)
+	}
+
+	if val, ok := a[4].(string); !ok {
+		t.Errorf("fifth element should be a string")
+	} else if val != "ab" {
+		t.Errorf("fifth element should be \"ab\", was %q", val)
+	}
+}
