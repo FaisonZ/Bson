@@ -35,34 +35,21 @@ func (bb *BitBuilder) AddBits(bits byte, len int) error {
 	}
 
 	shift := 8 - bb.currBytePos - len
-	/*
-		fmt.Printf(
-			"currPos: %d ; len: %d ; shift: %d\ninput:   %08b\n",
-			bb.currBytePos,
-			len,
-			shift,
-			bits,
-		)
-	*/
 
 	if shift < 0 {
 		shiftedBits := bits >> -shift
-		// fmt.Printf("shifted: %08b\n", shiftedBits)
 		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.grow()
 
 		shiftedBits = bits << (8 + shift)
-		// fmt.Printf("shifted: %08b\n", shiftedBits)
 		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.currBytePos += -shift
 	} else {
 		shiftedBits := bits << shift
-		// fmt.Printf("shifted: %08b\n", shiftedBits)
 		bb.Bytes[bb.currByte] |= shiftedBits
 		bb.currBytePos += len
 	}
 
-	// fmt.Println(bb)
 	return nil
 }
 

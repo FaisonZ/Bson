@@ -20,6 +20,13 @@ func NewBitReader(bs []byte) *BitReader {
 }
 
 func (br *BitReader) GetBits(l int) (byte, error) {
+	if l < 1 || l > 8 {
+		return 0, fmt.Errorf(
+			"GetBits: Invalid len (%d). len must be between 1 and 8",
+			l,
+		)
+	}
+
 	if br.bitPos == 8 {
 		br.bytePos += 1
 		br.bitPos = 0
@@ -27,13 +34,6 @@ func (br *BitReader) GetBits(l int) (byte, error) {
 
 	shift := 8 - br.bitPos - l
 
-	fmt.Printf(
-		"shift: %d ; bitPos: %d ; bytePos: %d ; l: %d\n",
-		shift,
-		br.bitPos,
-		br.bytePos,
-		l,
-	)
 	if shift < 0 {
 		hb := byte(math.Pow(2, float64(8-br.bitPos))) - 1
 		l := br.bytes[br.bytePos] & hb
@@ -48,11 +48,8 @@ func (br *BitReader) GetBits(l int) (byte, error) {
 		return l | r, nil
 	} else {
 		hb := byte(math.Pow(2, float64(8-br.bitPos))) - 1
-		fmt.Printf("Mask: (%d) (%d) %08b\n", 8-br.bitPos, hb, hb)
 		b := br.bytes[br.bytePos] & hb
-		fmt.Printf("%08b\n", b)
 		b >>= shift
-		fmt.Printf("%08b\n", b)
 		br.bitPos += l
 		return b, nil
 	}
