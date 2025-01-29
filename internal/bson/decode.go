@@ -21,14 +21,6 @@ func NewDecoder(bs []byte) (*Decoder, error) {
 		return d, fmt.Errorf("Empty bytes received")
 	}
 
-	err := d.decodeVersion()
-
-	if err != nil {
-		return d, err
-	} else if d.bsonVersion != 1 {
-		return d, fmt.Errorf("Invalid version number: %d", d.bsonVersion)
-	}
-
 	return d, nil
 }
 
@@ -43,12 +35,92 @@ func (d *Decoder) decodeVersion() error {
 	return nil
 }
 
-func Decode(bs []byte, res *any) error {
-	_, err := NewDecoder(bs)
+func (d *Decoder) decode() (any, error) {
+	err := d.decodeVersion()
 
 	if err != nil {
-		return err
+		return nil, err
+	} else if d.bsonVersion != 1 {
+		return nil, fmt.Errorf("Invalid version number: %d", d.bsonVersion)
 	}
 
-	return nil
+	res, err := d.decodeValue()
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (d *Decoder) decodeValue() (any, error) {
+	tokenBits, err := d.br.GetBits(3)
+
+	fmt.Printf("Token: %03b\n", tokenBits)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if tokenBits == OBJECT_TOKEN {
+		return d.decodeObject()
+	} else if tokenBits == STRING_TOKEN {
+		return d.decodeString()
+	}
+
+	return nil, nil
+}
+
+func (d *Decoder) decodeLength() (int, error) {
+	l, err := d.br.GetBits(5)
+	return int(l), err
+}
+
+func (d *Decoder) decodeObject() (any, error) {
+	l, err := d.decodeLength()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Object len: %d\n", l)
+	o := make(map[string]any, l)
+
+	for i := 0; i < l; i++ {
+		d.br.GetBits(3)
+		key, _ := d.decodeString()
+		fmt.Printf("Key: %s\n", key)
+		o[key], _ = d.decodeValue()
+	}
+
+	return o, nil
+}
+
+func (d *Decoder) decodeString() (string, error) {
+	l, err := d.decodeLength()
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf("Get %d bytes for string\n", l)
+	sbytes, err := d.br.GetBytes(l)
+	if err != nil {
+		return "", err
+	}
+
+	return string(sbytes), nil
+}
+
+func Decode(bs []byte) (any, error) {
+	d, err := NewDecoder(bs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := d.decode()
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
