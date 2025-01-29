@@ -27,32 +27,40 @@ func (br *BitReader) GetBits(l int) (byte, error) {
 		)
 	}
 
+	/*
+		fmt.Printf("bytePos: %d ; bitPos: %d\n", br.bytePos, br.bitPos)
+		if br.bytePos > 0 {
+			fmt.Printf("%08b ", br.bytes[br.bytePos-1])
+		}
+		fmt.Printf("%08b", br.bytes[br.bytePos])
+		if br.bytePos+1 < len(br.bytes) {
+			fmt.Printf(" %08b", br.bytes[br.bytePos+1])
+		}
+		fmt.Printf("\n")
+	*/
 	if br.bitPos == 8 {
 		br.bytePos += 1
 		br.bitPos = 0
 	}
 
-	shift := 8 - br.bitPos - l
+	bitsLeftInByte := 8 - br.bitPos
+	shift := bitsLeftInByte - l
 
+	// fmt.Printf("Shift: %d\n", shift)
 	if shift < 0 {
-		hb := byte(math.Pow(2, float64(8-br.bitPos))) - 1
-		l := br.bytes[br.bytePos] & hb
-		l <<= -shift
-		br.bytePos += 1
-		br.bitPos = 0
-		hb = byte(math.Pow(2, float64(8))) - 1
-		r := br.bytes[br.bytePos] & hb
-		r >>= (8 + shift)
-		br.bitPos += (8 + shift)
+		bitsFromNextByte := l - bitsLeftInByte
+		lb, _ := br.GetBits(bitsLeftInByte)
+		rb, _ := br.GetBits(bitsFromNextByte)
 
-		return l | r, nil
-	} else {
-		hb := byte(math.Pow(2, float64(8-br.bitPos))) - 1
-		b := br.bytes[br.bytePos] & hb
-		b >>= shift
-		br.bitPos += l
-		return b, nil
+		return (lb << bitsFromNextByte) | rb, nil
 	}
+
+	hb := byte(math.Pow(2, float64(8-br.bitPos))) - 1
+	b := br.bytes[br.bytePos] & hb
+	b >>= shift
+	br.bitPos += l
+	// fmt.Printf("new bytePos: %d ; bitPos: %d\n", br.bytePos, br.bitPos)
+	return b, nil
 }
 
 func (br *BitReader) GetBytes(l int) ([]byte, error) {
