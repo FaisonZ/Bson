@@ -55,8 +55,6 @@ func (d *Decoder) decode() (any, error) {
 func (d *Decoder) decodeValue() (any, error) {
 	tokenBits, err := d.br.GetBits(3)
 
-	fmt.Printf("Token: %03b\n", tokenBits)
-
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +67,6 @@ func (d *Decoder) decodeValue() (any, error) {
 	case STRING_TOKEN:
 		return d.decodeString()
 	case NULL_TOKEN:
-		fmt.Printf("Got Null\n")
 		return nil, nil
 	case BOOLEAN_TOKEN:
 		return d.decodeBoolean()
@@ -90,14 +87,11 @@ func (d *Decoder) decodeObject() (any, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Object len: %d\n", l)
 	o := make(map[string]any, l)
 
 	for i := 0; i < l; i++ {
-		b, _ := d.br.GetBits(3)
-		fmt.Printf("String token for key: %03b\n", b)
+		d.br.GetBits(3)
 		key, _ := d.decodeString()
-		fmt.Printf("Key: %s\n", key)
 		o[key], err = d.decodeValue()
 
 		if err != nil {
@@ -115,7 +109,6 @@ func (d *Decoder) decodeArray() (any, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Array len: %d\n", l)
 	o := make([]any, 0, l)
 
 	for i := 0; i < l; i++ {
@@ -135,7 +128,6 @@ func (d *Decoder) decodeString() (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("Get %d bytes for string\n", l)
 	sbytes, err := d.br.GetBytes(l)
 	if err != nil {
 		return "", err
