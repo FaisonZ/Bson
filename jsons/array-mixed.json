@@ -1,0 +1,12 @@
+[
+    "banana",
+    "apple",
+    true,
+    "orange",
+    false,
+    "blueberry",
+    null,
+    "strawberry",
+    {"foo": "berry"},
+    "raspberry"
+]

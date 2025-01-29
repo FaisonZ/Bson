@@ -1,0 +1,18 @@
+{
+    "version": "20",
+    "names": [
+        "bob",
+        "bill",
+        "frank"
+    ],
+    "office": {
+        "street1": "123 test dr",
+        "street2": null,
+        "city": "Testington",
+        "state": "WI",
+        "zip": "53120"
+    },
+    "rate": "2.14",
+    "active": true,
+    "newsletterConsent": false
+}
