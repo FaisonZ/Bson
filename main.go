@@ -24,8 +24,6 @@ func runBitBuilder() {
 }
 
 func runEncodeJson() {
-	//var jsonBlob = []byte(`[{"foo":"bar"}, "foobar", true, false, null]`)
-	//var jsonBlob = []byte(`{"bing": null, "baz": true, "bar": false}`)
 	var jsonBlob = []byte(`["a", null, "b", true, "ab"]`)
 
 	bb := bit.NewBitBuilder()
@@ -38,31 +36,70 @@ func runEncodeJson() {
 	fmt.Println(bb)
 }
 
-func checkReduction(inReader io.Reader, outWriter io.Writer) {
-	jsonBytes, err := io.ReadAll(inReader)
+func checkReduction(iao InsAndOuts) {
+	jsonBytes, err := io.ReadAll(iao.in)
 	if err != nil {
-		fmt.Fprintf(outWriter, "Error reading JSON: %q\n", err)
+		fmt.Fprintf(iao.err, "Error reading JSON: %q\n", err)
 		return
 	}
 
 	bb := bit.NewBitBuilder()
 	err = bson.EncodeJson(jsonBytes, bb)
 	if err != nil {
-		fmt.Fprintf(outWriter, "Error encoding: %q\n", err)
+		fmt.Fprintf(iao.err, "Error encoding: %q\n", err)
 		return
 	}
 
 	fmt.Fprintf(
-		outWriter,
+		iao.out,
 		"Json size: %d\nBson size: %d\n",
 		len(jsonBytes),
 		len(bb.Bytes),
 	)
-	fmt.Fprintf(outWriter, "diff: %d\n", len(jsonBytes)-len(bb.Bytes))
+	fmt.Fprintf(iao.out, "diff: %d\n", len(jsonBytes)-len(bb.Bytes))
+}
+
+func getCommand(args []string) (cmd string, err error) {
+	if len(args) == 2 {
+		switch args[1] {
+		case "encode":
+			return "encode", nil
+		case "decode":
+			return "decode", nil
+		case "check":
+			return "check", nil
+		}
+	}
+
+	return "", fmt.Errorf(
+		"Invalid command. Valid commands: bson encode, bson decode, bson check",
+	)
+}
+
+type InsAndOuts struct {
+	in  io.Reader
+	out io.Writer
+	err io.Writer
 }
 
 func main() {
-	// runEncodeJson()
-	// runBitBuilder()
-	checkReduction(os.Stdin, os.Stdout)
+	cmd, err := getCommand(os.Args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s", err)
+		os.Exit(1)
+		return
+	}
+
+	insOuts := InsAndOuts{
+		in:  os.Stdin,
+		out: os.Stdout,
+		err: os.Stderr,
+	}
+
+	switch cmd {
+	case "encode":
+	case "decode":
+	case "check":
+		checkReduction(insOuts)
+	}
 }
