@@ -283,3 +283,37 @@ func TestEncodeLongObject2(t *testing.T) {
 		t.Errorf("Expected:\n%08b\nReceived:\n%08b", expected, bb.Bytes)
 	}
 }
+
+func TestEncodeJsonInts(t *testing.T) {
+	expected := []byte{
+		0b0001_0100,
+		0b0101_1000,
+		0b0000_0101,
+		0b0100_0101,
+		0b1111_0100,
+		0b0101_0110,
+		0b0100_1011,
+		0b0011_0011,
+		0b0011_0011,
+		0b0011_0011,
+		0b0001_0011,
+		0b0100_0101,
+		0b0110_0011,
+		0b1001_0001,
+		0b1000_0010,
+		0b0100_0100,
+		0b1111_0100,
+		0b0000_0000,
+		0b0000_0000,
+		0b1000_0111,
+		0b1011_0000,
+	}
+
+	jsonBlob := []byte(`[10,32021,1503238552,5000000000000000000,-10]`)
+	bb := bit.NewBitBuilder()
+	EncodeJson(jsonBlob, bb)
+
+	if res := bytes.Compare(expected, bb.Bytes); res != 0 {
+		t.Errorf("Expected:\n%08b\n Received:\n%08b", expected, bb.Bytes)
+	}
+}

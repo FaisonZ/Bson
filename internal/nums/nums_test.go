@@ -40,6 +40,51 @@ func TestIsInt(t *testing.T) {
 	}
 }
 
+func TestMinIntSize(t *testing.T) {
+	minSizeTests := []struct {
+		name    string
+		inInt   float64
+		outSize int
+	}{
+		{
+			name:    "Returns 8 for 10",
+			inInt:   10,
+			outSize: 8,
+		},
+		{
+			name:    "Returns 8 for -10",
+			inInt:   -10,
+			outSize: 8,
+		},
+		{
+			name:    "Returns 16 for 30,000",
+			inInt:   30_000,
+			outSize: 16,
+		},
+		{
+			name:    "Returns 32 for 32 bit numbers",
+			inInt:   -2_147_483_648,
+			outSize: 32,
+		},
+		{
+			name:    "Returns 64",
+			inInt:   5_000_000_000_000_000_000,
+			outSize: 64,
+		},
+	}
+
+	for _, tt := range minSizeTests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MinIntSize(tt.inInt)
+			if err != nil {
+				t.Errorf("Unexpected error: %q", err)
+			} else if got != tt.outSize {
+				t.Errorf("Expected %v, got %v", tt.outSize, got)
+			}
+		})
+	}
+}
+
 func TestIntFitsInSize(t *testing.T) {
 	intFitsTests := []struct {
 		name     string
