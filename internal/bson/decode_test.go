@@ -3,6 +3,7 @@ package bson
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/FaisonZ/bson/internal/bit"
@@ -245,5 +246,45 @@ func TestDecodeLongString(t *testing.T) {
 
 	if got != expected {
 		t.Errorf("Expected %q, got %q", expected, got)
+	}
+}
+
+func TestDecodeLargeArray(t *testing.T) {
+	expected := []any{
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
+		"o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1",
+		"2", "3", "4", "5",
+	}
+
+	v, err := Decode([]byte{
+		0b0001_0101, 0b1111_0110, 0b0001_0110, 0b0001_0110, 0b0001_0110,
+		0b0010_0110, 0b0001_0110, 0b0011_0110, 0b0001_0110, 0b0100_0110,
+		0b0001_0110, 0b0101_0110, 0b0001_0110, 0b0110_0110, 0b0001_0110,
+		0b0111_0110, 0b0001_0110, 0b1000_0110, 0b0001_0110, 0b1001_0110,
+		0b0001_0110, 0b1010_0110, 0b0001_0110, 0b1011_0110, 0b0001_0110,
+		0b1100_0110, 0b0001_0110, 0b1101_0110, 0b0001_0110, 0b1110_0110,
+		0b0001_0110, 0b1111_0110, 0b0001_0111, 0b0000_0110, 0b0001_0111,
+		0b0001_0110, 0b0001_0111, 0b0010_0110, 0b0001_0111, 0b0011_0110,
+		0b0001_0111, 0b0100_0110, 0b0001_0111, 0b0101_0110, 0b0001_0111,
+		0b0110_0110, 0b0001_0111, 0b0111_0110, 0b0001_0111, 0b1000_0110,
+		0b0001_0111, 0b1001_0110, 0b0001_0111, 0b1010_0110, 0b0001_0011,
+		0b0000_0110, 0b0001_0011, 0b0001_0110, 0b0001_0011, 0b0010_0110,
+		0b0001_0011, 0b0011_0110, 0b0001_0011, 0b0100_0000, 0b1011_0000,
+		0b1001_1010, 0b1000_0000,
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	arr, ok := v.([]any)
+	if !ok {
+		t.Errorf("Failed to decode the root array")
+	} else if len(arr) == 0 {
+		t.Errorf("Should not be an empty array")
+	}
+
+	if !slices.Equal(arr, expected) {
+		t.Errorf("Expected:\n%v\nReceived:\n%v", expected, arr)
 	}
 }

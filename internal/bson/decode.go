@@ -106,28 +106,31 @@ func (d *Decoder) decodeObject() (any, error) {
 	return o, nil
 }
 
-func (d *Decoder) decodeArray() (any, error) {
+func (d *Decoder) decodeArray() ([]any, error) {
 	l, err := d.decodeLength()
-
 	if err != nil {
-		return nil, err
+		return []any{}, err
 	}
 
-	o := make([]any, 0, l)
+	arr := make([]any, 0, l)
 
 	for i := 0; i < l; i++ {
 		val, err := d.decodeValue()
 		if err != nil {
-			return o, err
+			return arr, err
 		}
-		o = append(o, val)
+		arr = append(arr, val)
 	}
 
-	return o, nil
-}
+	if l == MAX_CHUNK_LENGTH {
+		moreArr, err := d.decodeArray()
+		if err != nil {
+			return []any{}, err
+		}
+		arr = append(arr, moreArr...)
+	}
 
-func (d *Decoder) decodeStringChunk() (string, error) {
-	return "", nil
+	return arr, nil
 }
 
 func (d *Decoder) decodeString() (string, error) {
