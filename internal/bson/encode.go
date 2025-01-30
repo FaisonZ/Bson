@@ -13,9 +13,10 @@ const (
 	OBJECT_TOKEN     = 0b001
 	ARRAY_TOKEN      = 0b010
 	STRING_TOKEN     = 0b011
-	NUMBER_TOKEN     = 0b100
+	INTEGER_TOKEN    = 0b100
 	BOOLEAN_TOKEN    = 0b101
 	NULL_TOKEN       = 0b110
+	FLOAT_TOKEN      = 0b111
 	FALSE            = 0b0
 	TRUE             = 0b1
 	MAX_CHUNK_LENGTH = 0b1_1111
