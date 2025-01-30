@@ -142,7 +142,7 @@ func (d *Decoder) decodeString() (string, error) {
 		return "", err
 	}
 
-	if l == MAX_STRING_CHUNK {
+	if l == MAX_CHUNK_LENGTH {
 		moreBytes, err := d.decodeString()
 		if err != nil {
 			return "", err

@@ -3,6 +3,7 @@ package bson
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/FaisonZ/bson/internal/bit"
 )
@@ -17,7 +18,7 @@ const (
 	NULL_TOKEN       = 0b110
 	FALSE            = 0b0
 	TRUE             = 0b1
-	MAX_STRING_CHUNK = 0b1_1111
+	MAX_CHUNK_LENGTH = 0b1_1111
 )
 
 func EncodeJson(j []byte, bb *bit.BitBuilder) error {
@@ -93,16 +94,16 @@ func encodeStringChunks(s string, bb *bit.BitBuilder) error {
 	strToWrite := s
 	strRemaining := ""
 
-	if len(strToWrite) >= MAX_STRING_CHUNK {
-		strToWrite = strToWrite[:MAX_STRING_CHUNK]
-		strRemaining = s[MAX_STRING_CHUNK:]
+	if len(strToWrite) >= MAX_CHUNK_LENGTH {
+		strToWrite = strToWrite[:MAX_CHUNK_LENGTH]
+		strRemaining = s[MAX_CHUNK_LENGTH:]
 	}
 
 	//fmt.Printf("Len: %d\n", len(strToWrite))
 	writeLength(byte(len(strToWrite)), bb)
 	writeString(strToWrite, bb)
 
-	if len(strToWrite) >= MAX_STRING_CHUNK {
+	if len(strToWrite) >= MAX_CHUNK_LENGTH {
 		encodeStringChunks(strRemaining, bb)
 	}
 
@@ -136,11 +137,39 @@ func encodeArray(s []any, bb *bit.BitBuilder) error {
 }
 
 func encodeObject(o map[string]any, bb *bit.BitBuilder) error {
-	writeTokenWithLength(OBJECT_TOKEN, uint8(len(o)), bb)
+	writeToken(OBJECT_TOKEN, bb)
 
-	for key, a := range o {
+	keys := make([]string, 0, len(o))
+	for key := range o {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+
+	return encodeObjectChunk(keys, o, bb)
+}
+
+func encodeObjectChunk(
+	keys []string,
+	o map[string]any,
+	bb *bit.BitBuilder,
+) error {
+	keysToWrite := keys
+	keysRemaining := []string{}
+
+	if len(keysToWrite) >= MAX_CHUNK_LENGTH {
+		keysToWrite = keysToWrite[:MAX_CHUNK_LENGTH]
+		keysRemaining = keys[MAX_CHUNK_LENGTH:]
+	}
+
+	//fmt.Printf("Len: %d\n", len(strToWrite))
+	writeLength(byte(len(keysToWrite)), bb)
+	for _, key := range keysToWrite {
 		encodeString(key, bb)
-		encodeValue(a, bb)
+		encodeValue(o[key], bb)
+	}
+
+	if len(keysToWrite) >= MAX_CHUNK_LENGTH {
+		encodeObjectChunk(keysRemaining, o, bb)
 	}
 
 	return nil
