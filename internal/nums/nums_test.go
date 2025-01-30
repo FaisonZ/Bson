@@ -39,3 +39,72 @@ func TestIsInt(t *testing.T) {
 		})
 	}
 }
+
+func TestIntFitsInSize(t *testing.T) {
+	intFitsTests := []struct {
+		name     string
+		inInt    float64
+		inSize   int
+		expected bool
+	}{
+		{
+			name:     "Returns true for 8 bit int",
+			inInt:    10,
+			inSize:   8,
+			expected: true,
+		},
+		{
+			name:     "Returns true for negative 8 bit int",
+			inInt:    -10,
+			inSize:   8,
+			expected: true,
+		},
+		{
+			name:     "Returns true for 16 bit int",
+			inInt:    30_000,
+			inSize:   16,
+			expected: true,
+		},
+		{
+			name:     "Returns false for 16 bit int with size 8",
+			inInt:    30_000,
+			inSize:   8,
+			expected: false,
+		},
+		{
+			name:     "Returns true for 32 bit int",
+			inInt:    -2_147_483_648,
+			inSize:   32,
+			expected: true,
+		},
+		{
+			name:     "Returns true for 64 bit int",
+			inInt:    5_000_000_000_000_000_000,
+			inSize:   64,
+			expected: true,
+		},
+	}
+
+	for _, tt := range intFitsTests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IntFitsInSize(tt.inInt, tt.inSize)
+			if err != nil {
+				t.Errorf("Unexpected error: %q", err)
+			} else if got != tt.expected {
+				t.Errorf("Expected %v, got %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestIntFitsInSizeErrors(t *testing.T) {
+	_, err := IntFitsInSize(1.0, 0)
+	if err == nil {
+		t.Error("Should return error for incorrect int size")
+	}
+
+	_, err = IntFitsInSize(0.1, 8)
+	if err == nil {
+		t.Error("Should return error for passing in a non int float")
+	}
+}
