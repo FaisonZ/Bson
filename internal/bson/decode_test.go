@@ -194,3 +194,56 @@ func TestDecode3(t *testing.T) {
 		t.Errorf("fifth element should be \"ab\", was %q", val)
 	}
 }
+
+func TestDecodeLongString(t *testing.T) {
+	input := []byte{
+		0b0111_1111,
+		0b0110_0001,
+		0b0110_0010,
+		0b0110_0011,
+		0b0110_0100,
+		0b0110_0101,
+		0b0110_0110,
+		0b0110_0111,
+		0b0110_1000,
+		0b0110_1001,
+		0b0110_1010,
+		0b0110_1011,
+		0b0110_1100,
+		0b0110_1101,
+		0b0110_1110,
+		0b0110_1111,
+		0b0111_0000,
+		0b0111_0001,
+		0b0111_0010,
+		0b0111_0011,
+		0b0111_0100,
+		0b0111_0101,
+		0b0111_0110,
+		0b0111_0111,
+		0b0111_1000,
+		0b0111_1001,
+		0b0111_1010,
+		0b0011_0000,
+		0b0011_0001,
+		0b0011_0010,
+		0b0011_0011,
+		0b0011_0100,
+		0b0000_1001,
+		0b1010_1000,
+	}
+	expected := "abcdefghijklmnopqrstuvwxyz012345"
+
+	d, _ := NewDecoder(input)
+
+	// Toss out the String token for this test
+	d.br.GetBits(3)
+	got, err := d.decodeString()
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	if got != expected {
+		t.Errorf("Expected %q, got %q", expected, got)
+	}
+}

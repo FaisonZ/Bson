@@ -8,15 +8,16 @@ import (
 )
 
 const (
-	BSON_VERSION  = 0b0001
-	OBJECT_TOKEN  = 0b001
-	ARRAY_TOKEN   = 0b010
-	STRING_TOKEN  = 0b011
-	NUMBER_TOKEN  = 0b100
-	BOOLEAN_TOKEN = 0b101
-	NULL_TOKEN    = 0b110
-	FALSE         = 0b0
-	TRUE          = 0b1
+	BSON_VERSION     = 0b0001
+	OBJECT_TOKEN     = 0b001
+	ARRAY_TOKEN      = 0b010
+	STRING_TOKEN     = 0b011
+	NUMBER_TOKEN     = 0b100
+	BOOLEAN_TOKEN    = 0b101
+	NULL_TOKEN       = 0b110
+	FALSE            = 0b0
+	TRUE             = 0b1
+	MAX_STRING_CHUNK = 0b1_1111
 )
 
 func EncodeJson(j []byte, bb *bit.BitBuilder) error {
@@ -41,13 +42,18 @@ func writeToken(tokenByte byte, bb *bit.BitBuilder) error {
 	return nil
 }
 
+func writeLength(lengthByte byte, bb *bit.BitBuilder) error {
+	bb.AddBits(lengthByte, 5)
+	return nil
+}
+
 func writeTokenWithLength(
 	tokenByte byte,
 	lengthByte byte,
 	bb *bit.BitBuilder,
 ) error {
 	writeToken(tokenByte, bb)
-	bb.AddBits(lengthByte, 5)
+	writeLength(lengthByte, bb)
 	return nil
 }
 
@@ -76,8 +82,28 @@ func encodeValue(a any, bb *bit.BitBuilder) error {
 }
 
 func encodeString(s string, bb *bit.BitBuilder) error {
-	writeTokenWithLength(STRING_TOKEN, uint8(len(s)), bb)
-	writeString(s, bb)
+	writeToken(STRING_TOKEN, bb)
+	encodeStringChunks(s, bb)
+
+	return nil
+}
+
+func encodeStringChunks(s string, bb *bit.BitBuilder) error {
+	strToWrite := s
+	strRemaining := ""
+
+	if len(strToWrite) >= MAX_STRING_CHUNK {
+		strToWrite = strToWrite[:MAX_STRING_CHUNK]
+		strRemaining = s[MAX_STRING_CHUNK:]
+	}
+
+	fmt.Printf("Len: %d\n", len(strToWrite))
+	writeLength(byte(len(strToWrite)), bb)
+	writeString(strToWrite, bb)
+
+	if len(strToWrite) >= MAX_STRING_CHUNK {
+		encodeStringChunks(strRemaining, bb)
+	}
 
 	return nil
 }
