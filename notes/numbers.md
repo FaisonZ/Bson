@@ -45,8 +45,23 @@ Tokens:
   * Float64 (`0b01`)
 
 Examples?
-| Number | Type | Type Token | Size Token | Number bytes | Combined |
-| - | - | - | - | - | - |
-| 10 | Int8 | `0b100` | `0b00` | `0b0000_1010` | `0b1000_0000, 0b0101_0000` |
-| -10 | Int8 | `0b100` | `0b00` | `0b1111_0110` | `0b1000_0111, 0b1011_0000` |
+| Number | Type | Type Token | Size Token | Number bytes | Combined | JSON bytes | Bson Bytes |
+| - | - | - | - | - | - | - | - |
+| 10 | Int8 | `0b100` | `0b00` |  `0b0000_1010` | `0b1000_0000, 0b0101_0000` | 2 | 2 |
+| -10 | Int8 | `0b100` | `0b00` | `0b1111_0110` | `0b1000_0111, 0b1011_0000` | 3 | 2 |
+| 32021 | Int16 | `0b100` | `0b01` | `0b0111_1101, 0b0001_0101` | `0b1000_1011, 0b1110_1000, 0b1010_1000` | 5 | 3 |
+
+Since I'm too lazy to figure out the bits myself and the website I used won't
+work above 53 bits or with floats, I'm leaving the examples at that.
+
+JSON is plain text, meaning every character used in a number is a byte. So as
+the number gets larger, the more bytes bson saves.
+
+* 0 is 1 byte in JSON, but 2 in Bson
+* 10 is 2 bytes in JSON, but 2 in Bson
+* -500 is 4 bytes in JSON, but 3 in Bson
+* 65000 is 5 bytes in JSON, but 3 in Bson
+* -65000 is 6 bytes in JSON, but 3 in Bson
+* 1503238552 is 10 bytes in JSON, but 5 in Bson
+* 5000000000000000000 is 19 bytes in JSON, but 9 bytes in Bson
 
