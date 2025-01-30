@@ -2,6 +2,7 @@ package bson
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"slices"
 	"testing"
@@ -246,6 +247,77 @@ func TestDecodeLongString(t *testing.T) {
 
 	if got != expected {
 		t.Errorf("Expected %q, got %q", expected, got)
+	}
+}
+
+func TestDecodeLargeObject(t *testing.T) {
+	expected := map[string]any{
+		"0": nil,
+		"1": nil,
+		"2": nil,
+		"3": nil,
+		"4": nil,
+		"5": nil,
+		"a": nil,
+		"b": nil,
+		"c": nil,
+		"d": nil,
+		"e": nil,
+		"f": nil,
+		"g": nil,
+		"h": nil,
+		"i": nil,
+		"j": nil,
+		"k": nil,
+		"l": nil,
+		"m": nil,
+		"n": nil,
+		"o": nil,
+		"p": nil,
+		"q": nil,
+		"r": nil,
+		"s": nil,
+		"t": nil,
+		"u": nil,
+		"v": nil,
+		"w": nil,
+		"x": nil,
+		"y": nil,
+		"z": nil,
+	}
+
+	v, err := Decode([]byte{
+		0b0001_0011, 0b1111_0110, 0b0001_0011, 0b0000_1100, 0b1100_0010,
+		0b0110_0011, 0b1001_1000, 0b0100_1100, 0b1011_0011, 0b0000_1001,
+		0b1001_1110, 0b0110_0001, 0b0011_0100, 0b1100_1100, 0b0010_0110,
+		0b1011_1001, 0b1000_0101, 0b1000_0111, 0b0011_0000, 0b1011_0001,
+		0b0110_0110, 0b0001_0110, 0b0011_1100, 0b1100_0010, 0b1100_1001,
+		0b1001_1000, 0b0101_1001, 0b0111_0011, 0b0000_1011, 0b0011_0110,
+		0b0110_0001, 0b0110_0111, 0b1100_1100, 0b0010_1101, 0b0001_1001,
+		0b1000_0101, 0b1010_0111, 0b0011_0000, 0b1011_0101, 0b0110_0110,
+		0b0001_0110, 0b1011_1100, 0b1100_0010, 0b1101_1001, 0b1001_1000,
+		0b0101_1011, 0b0111_0011, 0b0000_1011, 0b0111_0110, 0b0110_0001,
+		0b0110_1111, 0b1100_1100, 0b0010_1110, 0b0001_1001, 0b1000_0101,
+		0b1100_0111, 0b0011_0000, 0b1011_1001, 0b0110_0110, 0b0001_0111,
+		0b0011_1100, 0b1100_0010, 0b1110_1001, 0b1001_1000, 0b0101_1101,
+		0b0111_0011, 0b0000_1011, 0b1011_0110, 0b0110_0001, 0b0111_0111,
+		0b1100_1100, 0b0010_1111, 0b0001_1001, 0b1000_0101, 0b1110_0111,
+		0b0000_0101, 0b1000_0101, 0b1110_1011, 0b0000_0000,
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	o, ok := v.(map[string]any)
+	if !ok {
+		t.Errorf("Failed to decode the root object")
+	} else if len(o) == 0 {
+		t.Errorf("Should not be an empty object")
+	}
+
+	if !maps.Equal(o, expected) {
+		t.Errorf("Expected:\n%v\nReceived:\n%v", expected, o)
 	}
 }
 

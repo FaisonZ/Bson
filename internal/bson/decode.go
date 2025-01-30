@@ -2,6 +2,7 @@ package bson
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/FaisonZ/bson/internal/bit"
 )
@@ -84,9 +85,8 @@ func (d *Decoder) decodeLength() (int, error) {
 	return int(l), err
 }
 
-func (d *Decoder) decodeObject() (any, error) {
+func (d *Decoder) decodeObject() (map[string]any, error) {
 	l, err := d.decodeLength()
-
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +101,14 @@ func (d *Decoder) decodeObject() (any, error) {
 		if err != nil {
 			return o, err
 		}
+	}
+
+	if l == MAX_CHUNK_LENGTH {
+		moreO, err := d.decodeObject()
+		if err != nil {
+			return nil, err
+		}
+		maps.Copy(o, moreO)
 	}
 
 	return o, nil
