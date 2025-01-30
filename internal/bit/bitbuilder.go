@@ -54,14 +54,15 @@ func (bb *BitBuilder) AddBits(bits byte, l int) error {
 	if shift < 0 {
 		leftLen := l + shift
 		rightLen := -shift
-		rightMask := byte(math.Pow(2, float64(rightLen))) - 1
+		rightMask := byte(math.Pow(2, float64(rightLen)) - 1)
 
 		bb.AddBits(bits>>(-shift), leftLen)
 		bb.AddBits(bits&rightMask, rightLen)
 		return nil
 	}
 
-	shiftedBits := bits << shift
+	mask := byte(math.Pow(2, float64(l)) - 1)
+	shiftedBits := (bits & mask) << shift
 	bb.Bytes[bb.currByte] |= shiftedBits
 	bb.currBytePos += l
 

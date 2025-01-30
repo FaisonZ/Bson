@@ -126,11 +126,28 @@ func encodeBoolean(b bool, bb *bit.BitBuilder) error {
 	return nil
 }
 
-func encodeArray(s []any, bb *bit.BitBuilder) error {
-	writeTokenWithLength(ARRAY_TOKEN, uint8(len(s)), bb)
+func encodeArray(a []any, bb *bit.BitBuilder) error {
+	writeToken(ARRAY_TOKEN, bb)
+	return encodeArrayChunk(a, bb)
+}
 
-	for _, a := range s {
-		encodeValue(a, bb)
+func encodeArrayChunk(a []any, bb *bit.BitBuilder) error {
+	arrToWrite := a
+	arrRemaining := []any{}
+
+	if len(arrToWrite) >= MAX_CHUNK_LENGTH {
+		arrToWrite = arrToWrite[:MAX_CHUNK_LENGTH]
+		arrRemaining = a[MAX_CHUNK_LENGTH:]
+	}
+
+	//fmt.Printf("Len: %d\n", len(strToWrite))
+	writeLength(byte(len(arrToWrite)), bb)
+	for _, val := range arrToWrite {
+		encodeValue(val, bb)
+	}
+
+	if len(arrToWrite) >= MAX_CHUNK_LENGTH {
+		encodeArrayChunk(arrRemaining, bb)
 	}
 
 	return nil
