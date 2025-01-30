@@ -15,7 +15,8 @@ binary file to a spec
 
 * I know JSON and know it's one of the least optimal ways you can transfer data
 from a bandwidth point of view
-* Decided to make a binary encoding of JSON, and call it Bson (pronounced Bison)
+* Decided to make a binary encoding of JSON, and call it Bson (pronounced
+Bison, sometimes Bee-sahn (like Nisan), dealer's choice)
 
 * Started by counting out the types available in JSON
 * The number can fit in 3 bits
