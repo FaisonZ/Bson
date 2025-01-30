@@ -222,7 +222,6 @@ func encodeInt(n float64, bb *bit.BitBuilder) error {
 	}
 
 	var intSizeToken byte
-	fmt.Printf("size: %d\n", intSize)
 
 	switch intSize {
 	case 8:

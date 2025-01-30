@@ -360,3 +360,36 @@ func TestDecodeLargeArray(t *testing.T) {
 		t.Errorf("Expected:\n%v\nReceived:\n%v", expected, arr)
 	}
 }
+
+func TestDecodeJsonInts(t *testing.T) {
+	expected := []any{
+		int64(10),
+		int64(32021),
+		int64(1503238552),
+		int64(5000000000000000000),
+		int64(-10),
+	}
+
+	v, err := Decode([]byte{
+		0b0001_0100, 0b0101_1000, 0b0000_0101, 0b0100_0101, 0b1111_0100,
+		0b0101_0110, 0b0100_1011, 0b0011_0011, 0b0011_0011, 0b0011_0011,
+		0b0001_0011, 0b0100_0101, 0b0110_0011, 0b1001_0001, 0b1000_0010,
+		0b0100_0100, 0b1111_0100, 0b0000_0000, 0b0000_0000, 0b1000_0111,
+		0b1011_0000,
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %q", err)
+	}
+
+	arr, ok := v.([]any)
+	if !ok {
+		t.Errorf("Failed to decode the root array")
+	} else if len(arr) == 0 {
+		t.Errorf("Should not be an empty array")
+	}
+
+	if !slices.Equal(arr, expected) {
+		t.Errorf("Expected:\n%v\nReceived:\n%v", expected, arr)
+	}
+}

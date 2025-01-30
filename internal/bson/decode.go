@@ -1,6 +1,7 @@
 package bson
 
 import (
+	"encoding/binary"
 	"fmt"
 	"maps"
 
@@ -71,6 +72,8 @@ func (d *Decoder) decodeValue() (any, error) {
 		return nil, nil
 	case BOOLEAN_TOKEN:
 		return d.decodeBoolean()
+	case INTEGER_TOKEN:
+		return d.decodeInteger()
 	}
 
 	return nil, fmt.Errorf(
@@ -171,6 +174,45 @@ func (d *Decoder) decodeBoolean() (bool, error) {
 	}
 
 	return l == TRUE, nil
+}
+
+func (d *Decoder) decodeInteger() (i int64, err error) {
+	s, err := d.br.GetBits(2)
+	if err != nil {
+		return 0, err
+	}
+
+	var intBytes []byte
+	bytesToGet := 0
+
+	switch s {
+	case INT8_TOKEN:
+		bytesToGet = 1
+	case INT16_TOKEN:
+		bytesToGet = 2
+	case INT32_TOKEN:
+		bytesToGet = 4
+	case INT64_TOKEN:
+		bytesToGet = 8
+	}
+
+	intBytes, err = d.br.GetBytes(bytesToGet)
+	if err != nil {
+		return 0, err
+	}
+
+	switch s {
+	case INT8_TOKEN:
+		i = int64(int8(intBytes[0]))
+	case INT16_TOKEN:
+		i = int64(binary.BigEndian.Uint16(intBytes))
+	case INT32_TOKEN:
+		i = int64(binary.BigEndian.Uint32(intBytes))
+	case INT64_TOKEN:
+		i = int64(binary.BigEndian.Uint64(intBytes))
+	}
+
+	return i, nil
 }
 
 func Decode(bs []byte) (any, error) {
