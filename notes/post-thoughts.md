@@ -87,4 +87,19 @@ without repeated strings or object key names
 * And I need to make sure I can encode numbers well
 
 * By the way. You might have noticed that I ignored numbers until now
+* Started with ints
+* Wanted to store a number in the smallest signed integer that it fits in
+* as small as 8 bit, as large as 64 bit
+* So had to store some bits to flag the size
+* `0b00` for 8, `0b01` for 16, `0b10` for 32, and `0b11` for 64
+* This gives me the fun of making a breaking future change if we get 128 bit
+as a common integer size in the future.
+* But Golang defaults to 64 bit when decoding JSON, so that works for me too
+* First time had to look into Endianness.
+* Decided to go with Big Endian, because network order
+* It basically worked without issue
+* One note, to follow in Golang's footsteps, I decided to return all decoded
+ints as int64.
+* The size int was still needed for decoding the bytes though, so no effort
+wasted there
 
