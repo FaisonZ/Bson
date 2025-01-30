@@ -30,16 +30,29 @@ func (bb *BitBuilder) grow() {
 	bb.currBytePos = 0
 }
 
-func (bb *BitBuilder) AddBits(bits byte, len int) error {
+func (bb *BitBuilder) AddBits(bits byte, l int) error {
 	if bb.currBytePos == 8 {
 		bb.grow()
 	}
 
+	/*
+		fmt.Printf("currByte: %d ; currBytePos: %d\n", bb.currByte, bb.currBytePos)
+		fmt.Printf("FB: %08b\n", bb.Bytes[0])
+		if bb.currByte > 0 {
+			fmt.Printf("%08b ", bb.Bytes[bb.currByte-1])
+		}
+		fmt.Printf("%08b", bb.Bytes[bb.currByte])
+		if bb.currByte+1 < len(bb.Bytes) {
+			fmt.Printf(" %08b", bb.Bytes[bb.currByte+1])
+		}
+		fmt.Printf("\n")
+	*/
+
 	bitsLeftInByte := 8 - bb.currBytePos
-	shift := bitsLeftInByte - len
+	shift := bitsLeftInByte - l
 
 	if shift < 0 {
-		leftLen := len + shift
+		leftLen := l + shift
 		rightLen := -shift
 		rightMask := byte(math.Pow(2, float64(rightLen))) - 1
 
@@ -50,7 +63,7 @@ func (bb *BitBuilder) AddBits(bits byte, len int) error {
 
 	shiftedBits := bits << shift
 	bb.Bytes[bb.currByte] |= shiftedBits
-	bb.currBytePos += len
+	bb.currBytePos += l
 
 	return nil
 }

@@ -126,11 +126,16 @@ func (d *Decoder) decodeArray() (any, error) {
 	return o, nil
 }
 
+func (d *Decoder) decodeStringChunk() (string, error) {
+	return "", nil
+}
+
 func (d *Decoder) decodeString() (string, error) {
 	l, err := d.decodeLength()
 	if err != nil {
 		return "", err
 	}
+	//fmt.Printf("Len: %d\n", l)
 
 	sbytes, err := d.br.GetBytes(l)
 	if err != nil {

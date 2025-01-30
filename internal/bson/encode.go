@@ -29,6 +29,7 @@ func EncodeJson(j []byte, bb *bit.BitBuilder) error {
 	}
 
 	writeVersion(bb)
+	//fmt.Printf("v: %08b\n", bb.Bytes)
 	encodeValue(a, bb)
 	return nil
 }
@@ -97,7 +98,7 @@ func encodeStringChunks(s string, bb *bit.BitBuilder) error {
 		strRemaining = s[MAX_STRING_CHUNK:]
 	}
 
-	fmt.Printf("Len: %d\n", len(strToWrite))
+	//fmt.Printf("Len: %d\n", len(strToWrite))
 	writeLength(byte(len(strToWrite)), bb)
 	writeString(strToWrite, bb)
 
