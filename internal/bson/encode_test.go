@@ -2,10 +2,32 @@ package bson
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/FaisonZ/bson/internal/bit"
 )
+
+func TestEncodeJsonFailures(t *testing.T) {
+	invalidRoots := [][]byte{
+		[]byte(`"string"`),
+		[]byte(`123`),
+		[]byte(`true`),
+		[]byte(`false`),
+		[]byte(`null`),
+		[]byte(`0.123`),
+		[]byte(`1.123e-3`),
+	}
+
+	for _, j := range invalidRoots {
+		t.Run(fmt.Sprintf("Returns error for: %s", j), func(t *testing.T) {
+			bb := bit.NewBitBuilder()
+			if err := EncodeJson(j, bb); err == nil {
+				t.Errorf("Did not through error for non object/array root")
+			}
+		})
+	}
+}
 
 func TestEncodeJson(t *testing.T) {
 	expected := []byte{

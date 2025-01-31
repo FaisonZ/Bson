@@ -1,0 +1,227 @@
+[
+  {
+    "_id": "679c6ed67447101e96c26f9a",
+    "index": 0,
+    "guid": "d28be393-5070-4477-a4f1-159452c656af",
+    "isActive": true,
+    "balance": "$3,267.13",
+    "picture": "http://placehold.it/32x32",
+    "age": 21,
+    "eyeColor": "green",
+    "name": "Lynnette Austin",
+    "gender": "female",
+    "company": "PROSELY",
+    "email": "lynnetteaustin@prosely.com",
+    "phone": "+1 (946) 431-2625",
+    "address": "460 Hyman Court, Gibbsville, Kansas, 314",
+    "about": "Consectetur eiusmod qui et proident dolor exercitation incididunt officia dolore anim. Voluptate mollit irure esse elit proident id qui et laboris. Consequat consequat aliqua reprehenderit eu nulla consequat. Ex amet ut pariatur in enim est. Quis excepteur ipsum ad irure est quis ad ad incididunt aliquip excepteur in. Eu voluptate do adipisicing eiusmod ut non do tempor sint duis incididunt. Qui consectetur fugiat eu do exercitation quis laboris voluptate irure quis et.\r\n",
+    "registered": "2023-10-01T05:15:10 +05:00",
+    "latitude": 61.853013,
+    "longitude": 87.748941,
+    "tags": [
+      "nisi",
+      "qui",
+      "velit",
+      "ex",
+      "ex",
+      "sint",
+      "commodo"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Gay Hardin"
+      },
+      {
+        "id": 1,
+        "name": "Monica Franco"
+      },
+      {
+        "id": 2,
+        "name": "Darla Kirkland"
+      }
+    ],
+    "greeting": "Hello, Lynnette Austin! You have 2 unread messages.",
+    "favoriteFruit": "apple"
+  },
+  {
+    "_id": "679c6ed65da3ad9da43044f0",
+    "index": 1,
+    "guid": "b8278d49-ab29-41c0-beb0-afccfadc6569",
+    "isActive": false,
+    "balance": "$3,401.69",
+    "picture": "http://placehold.it/32x32",
+    "age": 35,
+    "eyeColor": "green",
+    "name": "Mcpherson Hopper",
+    "gender": "male",
+    "company": "ZEAM",
+    "email": "mcphersonhopper@zeam.com",
+    "phone": "+1 (880) 535-2888",
+    "address": "341 Dobbin Street, Fairview, Colorado, 3628",
+    "about": "Ut laboris sunt proident non. Nisi laboris enim qui irure commodo. Fugiat labore cupidatat in velit id.\r\n",
+    "registered": "2014-01-12T10:58:20 +06:00",
+    "latitude": -6.076877,
+    "longitude": -166.008419,
+    "tags": [
+      "reprehenderit",
+      "sit",
+      "tempor",
+      "sit",
+      "occaecat",
+      "sunt",
+      "tempor"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Malinda Mccormick"
+      },
+      {
+        "id": 1,
+        "name": "Delores Fernandez"
+      },
+      {
+        "id": 2,
+        "name": "Lester Morris"
+      }
+    ],
+    "greeting": "Hello, Mcpherson Hopper! You have 1 unread messages.",
+    "favoriteFruit": "apple"
+  },
+  {
+    "_id": "679c6ed69bf423d305399dd7",
+    "index": 2,
+    "guid": "4ceb0d84-c954-414b-8eed-a6c654761be8",
+    "isActive": true,
+    "balance": "$3,663.92",
+    "picture": "http://placehold.it/32x32",
+    "age": 20,
+    "eyeColor": "blue",
+    "name": "Amie Soto",
+    "gender": "female",
+    "company": "INSURITY",
+    "email": "amiesoto@insurity.com",
+    "phone": "+1 (943) 564-2438",
+    "address": "449 Imlay Street, Fresno, Oregon, 5252",
+    "about": "Sunt cillum minim sit voluptate consectetur adipisicing eu nisi eu. Ex nulla excepteur eiusmod officia pariatur veniam voluptate elit laboris. Do exercitation sint tempor aute nostrud anim irure nostrud est nisi minim est.\r\n",
+    "registered": "2018-12-13T05:46:51 +06:00",
+    "latitude": 78.861406,
+    "longitude": 36.338357,
+    "tags": [
+      "voluptate",
+      "do",
+      "eu",
+      "mollit",
+      "consequat",
+      "culpa",
+      "ullamco"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Gallagher Buckley"
+      },
+      {
+        "id": 1,
+        "name": "Wilkerson Cherry"
+      },
+      {
+        "id": 2,
+        "name": "Priscilla Beasley"
+      }
+    ],
+    "greeting": "Hello, Amie Soto! You have 2 unread messages.",
+    "favoriteFruit": "banana"
+  },
+  {
+    "_id": "679c6ed6c7b62fa614dfe18c",
+    "index": 3,
+    "guid": "09bf0709-177d-4c94-b000-5ffdb4b332e8",
+    "isActive": true,
+    "balance": "$1,828.72",
+    "picture": "http://placehold.it/32x32",
+    "age": 28,
+    "eyeColor": "brown",
+    "name": "Acevedo Spencer",
+    "gender": "male",
+    "company": "WRAPTURE",
+    "email": "acevedospencer@wrapture.com",
+    "phone": "+1 (922) 558-3486",
+    "address": "632 Poplar Street, Valmy, Michigan, 6845",
+    "about": "Aute commodo mollit amet culpa eu nulla consequat amet aute nulla aliqua ut. Irure laboris ut enim aute irure enim labore sint magna proident reprehenderit. Labore est nostrud esse laborum magna.\r\n",
+    "registered": "2015-03-01T05:29:41 +06:00",
+    "latitude": -64.744437,
+    "longitude": -72.712736,
+    "tags": [
+      "cupidatat",
+      "adipisicing",
+      "Lorem",
+      "in",
+      "nisi",
+      "proident",
+      "id"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Julia Winters"
+      },
+      {
+        "id": 1,
+        "name": "Aguilar Stokes"
+      },
+      {
+        "id": 2,
+        "name": "Minerva Dillon"
+      }
+    ],
+    "greeting": "Hello, Acevedo Spencer! You have 7 unread messages.",
+    "favoriteFruit": "banana"
+  },
+  {
+    "_id": "679c6ed6cb8fea674ffe98d0",
+    "index": 4,
+    "guid": "f685741c-f027-49ff-8b38-c505f066a9c9",
+    "isActive": false,
+    "balance": "$3,886.15",
+    "picture": "http://placehold.it/32x32",
+    "age": 20,
+    "eyeColor": "brown",
+    "name": "Janis Stephens",
+    "gender": "female",
+    "company": "GORGANIC",
+    "email": "janisstephens@gorganic.com",
+    "phone": "+1 (943) 407-2256",
+    "address": "431 Tiffany Place, Sehili, Arizona, 3028",
+    "about": "Lorem sit ut elit ex ipsum reprehenderit consequat amet. Ullamco ad velit magna fugiat culpa consectetur. Fugiat id commodo cillum pariatur sunt sit voluptate cillum do. Id laborum sit quis do esse sint ipsum do ea pariatur aliqua mollit magna velit. Minim exercitation ut consectetur id in non voluptate. Amet fugiat mollit consequat sint sit labore deserunt deserunt. Commodo exercitation labore proident fugiat velit mollit esse ex aute velit adipisicing.\r\n",
+    "registered": "2022-07-03T02:56:05 +05:00",
+    "latitude": 80.041542,
+    "longitude": -72.022915,
+    "tags": [
+      "ut",
+      "officia",
+      "elit",
+      "ut",
+      "anim",
+      "sit",
+      "irure"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Nancy Hendricks"
+      },
+      {
+        "id": 1,
+        "name": "Buchanan Emerson"
+      },
+      {
+        "id": 2,
+        "name": "Fischer Vang"
+      }
+    ],
+    "greeting": "Hello, Janis Stephens! You have 7 unread messages.",
+    "favoriteFruit": "apple"
+  }
+]

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"math"
 	"slices"
 
 	"github.com/FaisonZ/bson/internal/bit"
@@ -32,9 +33,21 @@ const (
 )
 
 func EncodeJson(j []byte, bb *bit.BitBuilder) error {
-	var a any
-	err := json.Unmarshal(j, &a)
+	var raw json.RawMessage
+	err := json.Unmarshal(j, &raw)
+	if err != nil {
+		return fmt.Errorf("JSON error: %v", err)
+	}
 
+	rootType, err := getTypeFromRaw(raw)
+	if err != nil {
+		return err
+	} else if rootType != "object" && rootType != "array" {
+		return fmt.Errorf("JSON must have a root object or array, found %q", rootType)
+	}
+
+	a, err := jsonUnmarshal(j)
+	//err = json.Unmarshal(j, &a)
 	if err != nil {
 		return fmt.Errorf("JSON error: %v", err)
 	}
@@ -84,8 +97,10 @@ func encodeValue(a any, bb *bit.BitBuilder) error {
 		encodeArray(ar, bb)
 	} else if b, ok := a.(bool); ok {
 		encodeBoolean(b, bb)
+	} else if n, ok := a.(int64); ok {
+		encodeInt(n, bb)
 	} else if n, ok := a.(float64); ok {
-		encodeNumber(n, bb)
+		encodeFloat(n, bb)
 	} else if a == nil {
 		encodeNull(bb)
 	}
@@ -202,17 +217,17 @@ func encodeObjectChunk(
 	return nil
 }
 
-func encodeNumber(n float64, bb *bit.BitBuilder) error {
-	if nums.IsInt(n) {
-		return encodeInt(n, bb)
-	} else {
-		fmt.Println("I haven't implemented floats yet")
-	}
+func encodeFloat(n float64, bb *bit.BitBuilder) error {
+	writeToken(FLOAT_TOKEN, bb)
+	fBytes := make([]byte, 8)
+
+	binary.BigEndian.PutUint64(fBytes, math.Float64bits(n))
+	bb.AddBytes(fBytes)
 
 	return nil
 }
 
-func encodeInt(n float64, bb *bit.BitBuilder) error {
+func encodeInt(n int64, bb *bit.BitBuilder) error {
 	writeToken(INTEGER_TOKEN, bb)
 	intBytes := make([]byte, 0, 4)
 

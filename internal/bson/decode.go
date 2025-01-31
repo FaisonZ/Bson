@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"maps"
+	"math"
 
 	"github.com/FaisonZ/bson/internal/bit"
 )
@@ -74,6 +75,8 @@ func (d *Decoder) decodeValue() (any, error) {
 		return d.decodeBoolean()
 	case INTEGER_TOKEN:
 		return d.decodeInteger()
+	case FLOAT_TOKEN:
+		return d.decodeFloat()
 	}
 
 	return nil, fmt.Errorf(
@@ -174,6 +177,16 @@ func (d *Decoder) decodeBoolean() (bool, error) {
 	}
 
 	return l == TRUE, nil
+}
+
+func (d *Decoder) decodeFloat() (float64, error) {
+	fBytes, err := d.br.GetBytes(8)
+	if err != nil {
+		return 0, err
+	}
+
+	f := math.Float64frombits(binary.BigEndian.Uint64(fBytes))
+	return f, nil
 }
 
 func (d *Decoder) decodeInteger() (i int64, err error) {

@@ -43,7 +43,7 @@ func TestIsInt(t *testing.T) {
 func TestMinIntSize(t *testing.T) {
 	minSizeTests := []struct {
 		name    string
-		inInt   float64
+		inInt   int64
 		outSize int
 	}{
 		{
