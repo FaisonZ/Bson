@@ -40,14 +40,16 @@ Thinking with pseudo packing
 2. object
 3. array
 4. string
-* number
-    5. int
-    6. float
-7. true
-8. false
-9. null
-10. object member
-11. NB
+5. number
+    1. int
+    2. float
+6. true
+7. false
+8. null
+9. object member
+10. NB
+
+-
 
 1. 001 - object
     1. length (key count)
