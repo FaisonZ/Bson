@@ -50,3 +50,20 @@ cat file.json | bson check
 displays the size (in bytes) of file.json, the bson encoding and displays the
 difference in size
 
+## Compromises
+
+I originally wanted to make sure all values that were encoded into Bson, would
+be decoded and wrote back into JSON exactly how it was before encoding. Due to
+how floats work, I decided to allow floats to come out however they come out.
+
+If you have the value `1.23`, encoding then decoding and writing out JSON will
+still get you `1.23`
+
+However, if you have `1.0`, you'll end up with `1`
+
+And because a floating point number is stored in binary as parts of an equation
+instead of a flat number, the value you get after encoding and decoding *could*
+end up with a rounding error.
+
+Also, if it's good enough for Golang's json.Unmarshal(), then I'm not going to
+worry too much on it.
