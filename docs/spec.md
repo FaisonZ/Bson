@@ -130,6 +130,12 @@ Encoding for a string larger than 31 bytes.
 00110101                    // The final byte of the string "5"
 ```
 
+Encoding for multibyte UTF-8 characters in a string: `"时"`
+```
+011 00011                   // String token and length(3)
+11100110 10010111 10110110  // The 3 bytes of "时"
+```
+
 #### Array
 
 * Value type: `010`
