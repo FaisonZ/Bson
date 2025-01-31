@@ -1,4 +1,4 @@
-# Bson Specification
+# Bson V1 Specification
 
 **Bson** - Bson is a binary encoding of JSON, hence the name Bson.
 
@@ -39,11 +39,11 @@ Bson encoding for `{"foo":"bar"}` with explanation
 Each Bson file starts with 4 bits for the version.
 
 ```
-0001    // Version bits (v1)
+0001    // Version bits (V1)
 ```
 
 Using 4 bits means that this spec can have at most 16 versions (15, since I'm
-skipping `000`), but this is a learning project, so I don't expect any version
+skipping `0000`), but this is a learning project, so I don't expect any version
 aside from version 1
 
 ### Root value
@@ -149,21 +149,21 @@ Encoding for `["a", "b", "c"]`
 
 * Value type: `001`
 * Length: `00000` - `11111`
-* Value: "Length" number of pairs of String Value for object key and Value for key
+* Value: "Length" number of pairs of String Value for object key and Value
 
 As a convention, object Key-Value pairs are encoded in ascending order based on
 the key
 
-Before Bson v1 is finalized, I will consider removing the String token from
-Object keys. Object keys in JSON are always strings, so might not need to token.
+Before Bson V1 is finalized, I will consider removing the String token from
+Object keys. Object keys in JSON are always strings, so might not need the token
 
 Encoding for `{"a": null, "b": "bar"}`
 ```
-001 00010                               // Object token and length(2)
-011 00001 01100001                      // Object key "a"
-110                                     // Value of "a": null
-011 00001 01100010                      // Object key "b"
-011 00011 01100010 01100001 01110010    // Value of "b": "bb"
+001 00010                       // Object token and length(2)
+011 00001 01100001              // Object key "a"
+110                             // Value of "a": null
+011 00001 01100010              // Object key "b"
+011 00011 01100010 01100010     // Value of "b": "bb"
 ```
 
 #### Float

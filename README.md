@@ -1,5 +1,7 @@
 # Binary JSON (bson)
 
+[Bson V1 Spec](docs/spec.md)
+
 A learning experience with converting things into binary and then decoding back
 from binary
 
