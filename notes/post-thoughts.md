@@ -1,25 +1,116 @@
 # My time making Bson (Post Thoughts)
 
+This is the story of how I ended up designing a specification for a binary
+encoding of JSON.
+
+## Old books and artisanal book binding
+
+For some years now, I've spent time browsing the Internet Archive for old and
+interesting books.
+
+I make cheddar cheese based on a book from 1900, learned some woodcraft skills
+from old proto Boy Scout organization handbooks, and most recently I started
+learning Old English from a textbook in the Creative Commons.
+
+Study for me has always been easier with a physical book, especially when you
+need to flip between the front and back of a book frequently. Try doing that
+with a PDF on your phone like I did, and you'll likely find that you've stopped
+trying.
+
+And so began my simple task: Figure out how to print a PDF as a book.
+
+So on a weekend, I considered how pages could be printed, 2 to a side of paper,
+and folded to make a book that is 5.5"x8.5". First think of how many pieces of
+paper can be reasonably folded in half. I settled on 8. Then think up the
+arrangement of the pages on front and back. I figured this out and made a script
+that spat out the pages for front printings and back printings. After that,
+print the page sets to separate PDFs that could then be printed 2 to a page.
+Finally fold them, sew them, and feel good about life.
+
+That was a fun solid day of effort there.
+
+Well it turns out a friend of mine already has a book binding system and does it
+way better than me. So now I'll just pay him to print and bind books for me.
+
+But he has a problem: The software he uses doesn't let him adjust margins for
+the book. So in some books, he'll have a lot of wasted space around the text,
+and sometimes the text gets too close to the middle fold and becomes unreadable.
+
+"Do you think you could figure this out?" he asks.
+
+"Sure," I says. And so I start looking for the PDF specification.
+
+## Sometimes a simple task is blocked by other simple tasks
+
+I never really watched the show Malcolm in the Middle, but long ago I caught one
+scene that frequently comes to mind when I'm doing things:
+
+Hal, the father of the family, needs to replace a lightbulb. When he goes to get
+a light bulb from a closet shelf, the shelf wobbles due to a broken support. So
+he goes to get a screw driver from a drawer, which squeeks. On and on it goes
+until he's working under his car and his wife asks him if he's replaced the
+lightbulb yet. So Hal comes out from under the car and yells "What does it look
+like I'm doing?!"
+
+[Hal fixing a light bulb](https://www.youtube.com/watch?v=AbSehcT19u0)
+
+Well I looked for the PDF specification, which Adobe requires you to buy for $0,
+then I realized that I have never worked with file specifications outside of
+HTML and JSON. And those are plain text, which I highly doubt PDFs are.
+
+And that's the moment I decided to learn how to develop a binary encoding, and
+write a program that can encode and decode it.
+
+You know, instead of "buying" the PDF spec and reading it.
+
+## A simple binary encoding project
+
+I mentioned JSON before. It has a really straight-forward standard and I work
+with it frequently. It is a plain text representation of data, and so it's a
+a little bulky. Maybe I could put together rules to encode JSON into binary.
+
+And so I started brainstorming over a Binary encoding of JSON, known as Bson.
+
+## Artisanal bit packing
+
+I hit the ground running and wrote notes that half covered the thoughts in my
+head ([view my brainstorming notes](/notes/brainstorming.md)].
+
+There was a lot of thoughts and I started thinking with bytes to encode types
+and lengths, but I realized quickly that whole bytes would probably make the
+binary encoding **larger** than the original JSON.
+
+So I looked at how many types of values there were, 7, and how many bits could
+cover each type, 3. If you look at the V1 Spec, you'll see all the Value types,
+but for example, an object is `001` and a string is `011`.
+
+And then I started considering a common form of JSON: `{"foo": "bar"}`.
+
+I already have types defined for objects and strings, so the next step was to
+define how the values were encoded. Well I learned some C a long time ago, so
+obviously I can just use null to terminate a string, right?
+
+For those who know before reading on, you know we'll come back to this later.
+
+So for a string, the binary encoding will look something like this:
+```
+011 [bytes for the string] [Null Byte]
+```
+
+Cool. On to objects. Objects have an unknown number of fields in them. I suppose
+I can also null terminate that? Then we can just encode a string for the object
+key followed by the encoding of that field's value:
+
+```
+001 [encoding of "foo"] [encoding of "bar"] [Null Byte]
+```
+
+
+
+
 Outline
 
-* Wanted to print books from books in the creative commons
-* Printing two to a page was fine, and came up with a way to sort the papges
-* But margins were an issue
-* Decided I needed to make an app that takes care of the page sorting and allows
-for margin manipulation
 
-* PDF has its own spec (major versions 1 and 2)
-* Decided that I need some prep before even looking into that
-* Needed a plan on how to think around binary specs and how to encode/decode a
-binary file to a spec
-
-* I know JSON and know it's one of the least optimal ways you can transfer data
-from a bandwidth point of view
-* Decided to make a binary encoding of JSON, and call it Bson (pronounced
-Bison, sometimes Bee-sahn (like Nisan), dealer's choice)
-
-* Started by counting out the types available in JSON
-* The number can fit in 3 bits
 * Started playing around with how to encode `{"foo":"bar"}`
 * Decided null termination would be great
 * Learned that null termination is not great
@@ -138,3 +229,9 @@ the exact same JSON
   * Note: The order of object keys will not be guaranteed, because maps
 * So I'm thinking now that I need to handle json Unmarshalling more closely
 * Time to refactor before moving on to floats
+
+* Decided to keep floats as 64 bit
+
+* Wrote the spec
+
+* The end
