@@ -103,3 +103,38 @@ ints as int64.
 * The size int was still needed for decoding the bytes though, so no effort
 wasted there
 
+* Floats... There's a problem here
+* If a JSON file has the value 3.0, my current code will encode that as an int
+* If you then decode, the value will be 3
+* On top of that, the max value of a int64 is larger than a float64, because of
+fancy math reasons that I'm not going to read enough to understand
+* So while looking into this issue, I learned about json.RawMessage
+* If you Unmarshal json into a `map[string]json.RawMessage`, or into a
+`[]json.RawMessage`, then you get the string as it was found in the JSON.
+* Strings will be strings, numbers will be strings, arrays will be strings
+including everything contained (including whitespace/new lines)
+
+```go
+jsonBlob := []byte{`{"a":1, "b": "bb", "c": {"foo":   "bar"}, "d": [  1],"e":1.23}`}
+var d map[string]json.RawMessage
+_ = json.Unmarshal(jsonBlob, &d)
+for key, v := range d {
+    fmt.Printf("[%s]: %s\n", key, v)
+}
+```
+
+Outputs:
+```
+[a]: 1
+[b]: "bb"
+[c]: {"foo":   "bar"}
+[d]: [  1]
+[e]: 1.23
+```
+
+* Keeping the exact values is important to me
+* If I encode a json file into bson, then decode that bson, I should end up with
+the exact same JSON
+  * Note: The order of object keys will not be guaranteed, because maps
+* So I'm thinking now that I need to handle json Unmarshalling more closely
+* Time to refactor before moving on to floats
