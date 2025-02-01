@@ -111,6 +111,9 @@ And arrays can work the same way. `["foo", "bar"]`:
 010 [encoding of "foo"] [encoding of "bar"] [Null Byte]
 ```
 
+Finally, to be safe, I decided to start the Bson encoding with 4 bits for the
+Bson version used for encoding.
+
 This felt like a good start to this learning project.
 
 ## Don't let UTF-8 multi-byte you on the butt
@@ -178,23 +181,124 @@ Array with a lot of elements:
 
 ## Laying the foundation
 
-Outline
+And so I started coding and I began with the encoder. But before starting the
+encoder, I needed to be able to write binary with bits.
+
+I wrote out how I wanted to accomplish this in my [notes on Bit Builder](/notes/bit-builder.md)
+(Note, I have no idea why I wrote a section on long strings in that file, but if
+you skip the Strings section, you get a full picture of my plan for Bit Builder).
+
+Most of the bits I plan to write are less than a byte, so I had to learn proper
+bit shifting. For example, to write my version bits `0001`, I need to shift 4
+to the left:
+
+```
+// Starts with a full byte:
+0b0000_0001
+
+// Then shift to the left:
+0b0000_0001 << 4
+0b0001_0000
+
+// Finally, get the bites into a slice of bytes
+bytes[0] |= 0b0001_0000
+
+// Keep track of the next bit available for writing, bit 5
+0b0001_0000
+//     ^ That one
+```
+
+And the next bits I add will always be either the Object or Array value type bits
+
+```
+// The object type bits (001)
+0b0000_0001
+
+// We need the three bits to be written starting at the 5th bit
+0b0000_0001 << 1
+0b0000_0010
+
+// Write those bits into the same byte the version bits are in:
+bytes[0] |= 0b0000_0010
+
+// Track the next available bit, bit 8
+0b0001_0010
+//        ^ That one
+```
+
+This was a fun task to accomplish. I had to keep track of my position in a Golang
+slice of bytes (`[]byte`), and my bit position in that byte. And I had to figure
+out how to properly write a collection of bits between two bytes when it happens
+to span the existing byte and a new one.
+
+Take a look at the code if you're interested. I was pretty happy with the results!
+
+With Bit Builder in hand, I started writing the encoder.
+
+In this, I learned a lot about how Go "Unmarshals" JSON into maps, array, strings,
+etc.. And there's something interesting about writing code to turn unknown types
+into a proper Go type before deciding what to do with it. Maybe not the best use
+of a strongly typed language, but it wasn't too painful.
+
+Either way, I took poor notes on what happened in this phase, but I just remember
+avoiding numbers like the plague. When I got to the point that I could take
+`{"foo": "bar"}` and spit out binary, I had a line of code that would print `"I
+haven't implemented numbers yet!"` to the console if you tried to encode a number.
+
+## Uno reverse
+
+Now that I was able to encode some JSON into Bson, I wanted to turn the tables
+and decode Bson back into JSON.
+
+And since I'm working with bits and not full bytes, I had to develop a way to
+read bit by bit. That's how I ended up with Bit Reader.
+
+Bit Reader was a lot like Bit Builder, in that I had to keep track of what byte
+I'm looking at and what bit in that byte. The main difference is that I already
+have a full list of bytes.
+
+So honestly, it went really smoothly. The one thing I had to work out was how to
+avoid getting extra bits from a byte when I only want a few bits. To solve this,
+I had to create a mask that I could `&` with the byte I'm reading from:
+
+```
+// The current byte, but I want 3 bits starting at 5
+0b0001_0010
+
+// Shift my bits so the 3 bits are all the way to the right
+0b0001_0010 >> 1
+0b0000_1001
+
+// Now if I just returned this, I would have `1001 instead of `001`
+// So create a mask of `111` to get rid of the extra 1
+(2^3 - 1) = 0b0000_0111
+0b0000_1001 & 0b0000_0111
+0b0000_0001
+
+// And now the bits are properly extracted
+```
+
+Another fun taks!
+
+So on to the decoder.
+
+It was kind of easy.
+
+I used the Bit Reader to get bits, interpret them, and then read values into
+maps, array, strings, etc.. Doing the encoding earlier helped me to have a good
+idea on how to tackle it.
+
+I did run into a small bug that highlighted a design issue in my spec: In reading
+bits for a Object field, I went straight to reading the string and skipped the
+3 bits that declared it a string.
+
+It was obvious at that point: JSON object fields are always strings. So I decided
+to just read the bits and move on. So I put it on my mental list to consider
+removing the string type bits for object field names.
 
 
-* Got started
+## Outline
 
-* BitBuilder first
-* Then encoder
-
-* Then decoder
-* But I need a BitReader first
-* Then decoder again
-
-* When decoding an object, I ran into issues.
-* Realized I skipped the value token for object keys
-* So put a line to quick consume the bits, but ignore them
-* Future improvement: All object keys are strings in JSON, so don't encode the
-string token for object keys.
 
 * Then I slapped together some JSON files, ran them forwards and backwards and
 got the correct results both ways!
