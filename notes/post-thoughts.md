@@ -67,22 +67,23 @@ You know, instead of "buying" the PDF spec and reading it.
 
 I mentioned JSON before. It has a really straight-forward standard and I work
 with it frequently. It is a plain text representation of data, and so it's a
-a little bulky. Maybe I could put together rules to encode JSON into binary.
+little bulky. Maybe I could put together rules to encode JSON into binary and
+save some bytes.
 
 And so I started brainstorming over a Binary encoding of JSON, known as Bson.
 
 ## Artisanal bit packing
 
 I hit the ground running and wrote notes that half covered the thoughts in my
-head ([view my brainstorming notes](/notes/brainstorming.md)].
+head ([view my brainstorming notes at your own risk](/notes/brainstorming.md)].
 
-There was a lot of thoughts and I started thinking with bytes to encode types
+There were a lot of thoughts and I started thinking with bytes to encode types
 and lengths, but I realized quickly that whole bytes would probably make the
 binary encoding **larger** than the original JSON.
 
 So I looked at how many types of values there were, 7, and how many bits could
 cover each type, 3. If you look at the V1 Spec, you'll see all the Value types,
-but for example, an object is `001` and a string is `011`.
+but to give an example here, an object is `001` and a string is `011`.
 
 And then I started considering a common form of JSON: `{"foo": "bar"}`.
 
@@ -98,27 +99,88 @@ So for a string, the binary encoding will look something like this:
 ```
 
 Cool. On to objects. Objects have an unknown number of fields in them. I suppose
-I can also null terminate that? Then we can just encode a string for the object
+I can also null terminate that. Then we can just encode a string for the object
 key followed by the encoding of that field's value:
 
 ```
 001 [encoding of "foo"] [encoding of "bar"] [Null Byte]
 ```
 
+And arrays can work the same way. `["foo", "bar"]`:
+```
+010 [encoding of "foo"] [encoding of "bar"] [Null Byte]
+```
 
+This felt like a good start to this learning project.
 
+## Don't let UTF-8 multi-byte you on the butt
+
+Something in the back of my mind started to worry me. And mind you, I have yet
+to code at this point, so it's the best time to worry!
+
+UTF-8 characters can span multiple bytes. What stops a byte inside of a UTF-8
+character from being a null byte?
+
+As best as I could find, nothing. Which means I can't depend on null bytes to
+terminate a string. So back to my plan!
+
+After that null byte research, I decided to go with length prefixing for strings,
+objects, and arrays.
+
+And now things look and feel more realistic:
+```
+001 [length 1] [encoding of key "foo"] [encoding of value "bar"]
+```
+
+I'll know exactly how many array items or object fields follow in the encoding,
+so decoding Bson should be a breeze!
+
+But how many bits should I use for my length? Well, I decided on 5. Not because
+31 seems like a reasonable max length for most strings (think of object keys).
+I purely chose it because when added to the 3 bits for the Value type, it's a
+whole byte.
+
+Purely asthetics, and it definitley won't come back to bite me later.
+
+Except later was later that night when I was walking my baby around the house.
+What happens if you have a string that's 32 bytes long?
+
+Luckily you can get a lot of thinking in when a baby is too restless to sleep
+and demands a 20 minute walk with papa at 10 pm.
+
+The solution was simple: Encode the string in chunks of 31 bytes max. Just look
+at the length of the string, if it's 31, then expect another length encoded
+after the 31 bytes of string data, followed by more bytes of the string. Keep
+doing that until the length is less than 31 and then you have the whole string.
+
+So a small string would look like this:
+```
+011 [length < 31] [String bytes matching length]
+```
+
+And a big string would look like this:
+```
+011 [length = 31] [31 bytes of string] [length < 31] [The final bytes of the string]
+```
+
+While figuring this out, it became obvious that I have the exact same problem
+with Object fields and Array elements. So we just do the exact same thing.
+
+Object with a lot of fields:
+```
+001 [length = 31] [key-value pair of 31 fields] [length < 31] [key-value pair of the rest]
+```
+
+Array with a lot of elements:
+```
+010 [length = 31] [31 items] [length < 31] [the rest of the items]
+```
+
+## Laying the foundation
 
 Outline
 
 
-* Started playing around with how to encode `{"foo":"bar"}`
-* Decided null termination would be great
-* Learned that null termination is not great
-* Decided I need to use length-prefixing
-* But how long? How about 5 bits, max 31
-* After some though, decided I'd make a rope-like encoding:
-  * `[length][bytes up to the prev length][next length][bytes up to the next length]...`
-* Turns out I also should use length-prefixing for objects and arrays
 * Got started
 
 * BitBuilder first
