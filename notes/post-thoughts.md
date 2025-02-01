@@ -30,7 +30,8 @@ Finally fold them, sew them, and feel good about life.
 That was a fun solid day of effort there.
 
 Well it turns out a friend of mine already has a book binding system and does it
-way better than me. So now I'll just pay him to print and bind books for me.
+way better than me. So now I'll just pay him to print and bind books for me
+instead.
 
 But he has a problem: The software he uses doesn't let him adjust margins for
 the book. So in some books, he'll have a lot of wasted space around the text,
@@ -40,7 +41,7 @@ and sometimes the text gets too close to the middle fold and becomes unreadable.
 
 "Sure," I says. And so I start looking for the PDF specification.
 
-## Sometimes a simple task is blocked by other simple tasks
+## One small favour
 
 I never really watched the show Malcolm in the Middle, but long ago I caught one
 scene that frequently comes to mind when I'm doing things:
@@ -116,7 +117,7 @@ Bson version used for encoding.
 
 This felt like a good start to this learning project.
 
-## Don't let UTF-8 multi-byte you on the butt
+## Don't let UTF-8 multi-byte you
 
 Something in the back of my mind started to worry me. And mind you, I have yet
 to code at this point, so it's the best time to worry!
@@ -127,8 +128,8 @@ character from being a null byte?
 As best as I could find, nothing. Which means I can't depend on null bytes to
 terminate a string. So back to my plan!
 
-After that null byte research, I decided to go with length prefixing for strings,
-objects, and arrays.
+After that null byte research, I determined that length prefixing is the way to
+go for strings, objects, and arrays.
 
 And now things look and feel more realistic:
 ```
@@ -138,9 +139,9 @@ And now things look and feel more realistic:
 I'll know exactly how many array items or object fields follow in the encoding,
 so decoding Bson should be a breeze!
 
-But how many bits should I use for my length? Well, I decided on 5. Not because
-31 seems like a reasonable max length for most strings (think of object keys).
-I purely chose it because when added to the 3 bits for the Value type, it's a
+But how many bits should I use for my length? Well, I chose 5. Not because 31
+seems like a reasonable max length for most strings (think of object keys). I
+purely chose it because when added to the 3 bits for the Value type, it's a
 whole byte.
 
 Purely asthetics, and it definitley won't come back to bite me later.
@@ -245,7 +246,7 @@ avoiding numbers like the plague. When I got to the point that I could take
 `{"foo": "bar"}` and spit out binary, I had a line of code that would print `"I
 haven't implemented numbers yet!"` to the console if you tried to encode a number.
 
-## Uno reverse
+## Uno reverso
 
 Now that I was able to encode some JSON into Bson, I wanted to turn the tables
 and decode Bson back into JSON.
@@ -288,77 +289,183 @@ I used the Bit Reader to get bits, interpret them, and then read values into
 maps, array, strings, etc.. Doing the encoding earlier helped me to have a good
 idea on how to tackle it.
 
-I did run into a small bug that highlighted a design issue in my spec: In reading
-bits for a Object field, I went straight to reading the string and skipped the
-3 bits that declared it a string.
+I did run into a small bug that highlighted a design issue in my spec: In
+reading bits for an Object field, I went straight to reading the string and
+skipped the 3 bits that declared it a string.
 
-It was obvious at that point: JSON object fields are always strings. So I decided
-to just read the bits and move on. So I put it on my mental list to consider
-removing the string type bits for object field names.
+It was obvious at that point: JSON object fields are always strings, which means
+I don't have to encode the Value type bits for a string when encoding object
+field names. So I put it on my mental list for later.
 
+## Test data
 
-## Outline
+It was time to stop hardcoding test json in my code and make some commands to
+encode and decode json from a file.
 
+To keep things simple for me, meaning not have to deal with reading from and
+writing to files, I decided to take JSON from Standard In and write Bson to
+Standard Out.
 
-* Then I slapped together some JSON files, ran them forwards and backwards and
-got the correct results both ways!
-* Made a `check` command to show the amount of bytes the JSON and corresponding
-Bson were, and the difference so I can see how much space I'm saving
-* Something around 20%, but this is an excercise in working with binary and
-specs
+```
+cat stuff.json | bson encode > stuff.bson
 
-* Then I used some website to generate a really big JSON file with an array of
-large objects
-* This JSON file would encode, but decoding failed
-* Then I remembered strings longer than 31 bytes
-* Decided to do the following:
-  * Get length of string in bytes
-  * If > 31, then encode the length 31 and the first 31 bytes of the string
-  * Then repeat the process with the rest of the string following those 31 bytes
-  * Repeat until we have between 0 and 30 bytes, which is the last part encoded
+cat stuff.bson | bson decode > stuff.json
+```
 
-* It worked!
-* Did the same for Objects
-* And the same for Arrays
-* Now the array of large objects encodes and decodes successfully
-* File reduction of 26%! Larger than I was expecting, since I'm leaving string
-bytes exactly as they are (no compression)
+This was fairly simple and you can look at `main.go` and probably understand it
+well enough if you don't know Golang.
 
-* Had a thought, what if I collected strings and shoved them at the back of the
-bson bytes?
-* Flag the "id" of the string in the JSON encoded section
-* And had an array of strings at the bottom
-* Possibly help when object keys are repeated, or other things
-* So just a thought
+Then I put together a bunch of JSON files into a `jsons` directory. Some I
+crafted by hand, others with [JSON Generator](https://json-generator.com/). But
+when ready, I started running them forwards and backwards through Bson:
+
+```
+$ cat jsons/object-simple.json 
+{"active":false, "foo":"bar", "num":10, "thing":null}
+$ cat jsons/object-simple.json | bson encode > a.bson
+$ cat a.bson | bson encode > a.json
+$ cat a.json
+{"active":false,"foo":"bar","num":10,"thing":null}
+```
+
+Success! And I could see that the Bson file was smaller than the JSON file. So
+Double Success!!
+
+But I got tired of manually determining how many bytes were saved when encoding
+some JSON, so I made another command:
+
+```
+$ cat jsons/object-simple.json | bson check
+Json size: 54
+Bson size: 29
+diff: 25
+```
+
+Life was good. And so I decided to try out some JSON files with large data:
+
+```
+$ cat jsons/array-large.json | bson encode | bson decode
+Invalid value token: 111
+```
+
+What? Why does that file fail when all the others worked?
+
+Well remember that thought I had one night while walking my baby at 10pm? I
+forgot to write any code to handle strings longer than 31 bytes when encoding or
+decoding.
+
+So it did come back later to bite me.
+
+I went over the general plan already, so I won't discuss it again here. If you
+want to, you can see my initial notes that I put in my
+[notes on Bit Builder](/notes/bit-builder.md), for whatever reason.
+
+Either way, I tackled it bit by bit:
+
+* Encode long string
+* Decode long string
+* Run JSON with long strings through encode and decode
+* Encode long array
+* Decode long array
+* Run JSON with a long array through encode and decode
+* Encode long object
+* Decode long object
+* Run JSON with a long object through encode and decode
+
+And with that, I could encode large JSON values and properly decode the Bson
+back into JSON.
+
+For fun, here's the Bson check for the file that previously failed:
+
+```
+$ cat jsons/array-large.json | bson check
+Json size: 7751
+Bson size: 5706
+diff: 2045
+```
+
+That's a 26% reduction! Which probably suprised me more than it did you.
+
+## Cow thoughts
+
+While doing cow chores at night, I sometimes have thoughts that I need to
+remember for later:
+
+"What if I collected strings, shoved them at the back of the Bson file, and then
+referenced those strings by ID instead of duplicating string bytes?"
+
+Could give a lot of savings for arrays of homogeneous objects.
+
 ```
 [bson version bits]
-[bson encoded JSON bytes]...
+[bson encoded JSON bytes]
+...
 ... [String member of array, but instead of storing "applesauce", just 5]
 ...
 [post bson encoded JSON bytes]
 [encoded array of strings]
-...[5th element: "applesauce"]
+...[5th element: "applesauce"]...
 ```
-* Probably only worth doing if it doesn't increase bytes by a lot in JSON
-without repeated strings or object key names
-* And I need to make sure I can encode numbers well
 
-* By the way. You might have noticed that I ignored numbers until now
-* Started with ints
-* Wanted to store a number in the smallest signed integer that it fits in
-* as small as 8 bit, as large as 64 bit
-* So had to store some bits to flag the size
-* `0b00` for 8, `0b01` for 16, `0b10` for 32, and `0b11` for 64
-* This gives me the fun of making a breaking future change if we get 128 bit
-as a common integer size in the future.
-* But Golang defaults to 64 bit when decoding JSON, so that works for me too
-* First time had to look into Endianness.
-* Decided to go with Big Endian, because network order
-* It basically worked without issue
-* One note, to follow in Golang's footsteps, I decided to return all decoded
-ints as int64.
-* The size int was still needed for decoding the bytes though, so no effort
-wasted there
+Either way, write it down, consider it later.
+
+## Is this your number?
+
+If you open the file [/jsons/array-large.json](/jsons/array-large.json), you'll
+notice something missing: numbers.
+
+I can't consider Bson complete until I have a solution for numbers, so it's time
+to bite the bullet and learn more about things like signed/unsigned integers of
+varying bit sizes, and why 0.1 + 0.2 = 0.30000000000000004
+
+But before learning what a mantissa is, I looked at the easier Integers first.
+
+No decimals, and for the most part (ignoring negatives), it's just plain binary.
+And after learning about 2's compliment, even the negatives made sense.
+
+Let's get Integers in the Spec.
+
+I want Integers to be encoded in their smallest amount of bytes possible. If a
+number fits in a signed 8 bit integer, shove it in a byte. If it fits into a
+32 bit integer, 3 bytes.
+
+Since there are only 4 integer sizes that I can tell (8, 16, 32, 64), I ditched
+the 5 bit length encoding and used a 2 bit flag instead:
+
+* `00` - 8 bit
+* `01` - 16 bit
+* `10` - 32 bit
+* `11` - 64 bit
+
+If we end up in a world with 128 bit integers, I'll have to make Bson V2 and
+bump up the bits to 3.
+
+```
+001 [size flag] [Integer bytes]
+```
+
+Before encoding though, I needed to convert a signed integer into bytes. And
+while looking through the Go standard library, I realized this will require some
+decisions around endianness.
+
+So I decided Big and moved on.
+
+Wrote the encoding with some effort. The decoding went smoother, and I followed
+in Go's footsteps by returning a 64 integer when decoding. Added new JSON files
+and revelled in the success!
+
+```
+$ cat jsons/array-objects-with-numbers.json | bson check
+Json size: 9339
+Bson size: 6566
+diff: 2773
+```
+
+## We'll all float on, alright!
+
+TKTKTK
+
+## Outline
 
 * Floats... There's a problem here
 * If a JSON file has the value 3.0, my current code will encode that as an int
