@@ -14,8 +14,8 @@ added to complete the last byte.
 
 Bson encoding of `{"foo":"bar"}` without explanation:
 ```
-00010010 00010110 00110110 01100110 11110110
-11110110 00110110 00100110 00010111 00100000
+00010010 00010001 10110011 00110111 10110111
+10110001 10110001 00110000 10111001 00000000
 ```
 
 Bson encoding for `{"foo":"bar"}` with explanation
@@ -24,11 +24,11 @@ Bson encoding for `{"foo":"bar"}` with explanation
 ^^^^ Version
 001     00001
 ^Object ^length
-  011     00011   01100110 01101111 01101111
-  ^String ^Length ^------- "foo" ----------^
+  00011       01100110 01101111 01101111
+  ^key length ^------- "foo" ----------^
   011     00011   01100010 01100001 01110010
   ^String ^Length ^------- "bar" ----------^
-0000
+0000000
 ^ Extra bits to fill out the last byte
 ```
 
@@ -156,20 +156,18 @@ Encoding for `["a", "b", "c"]`
 * Value type: `001`
 * Length: `00000` - `11111`
 * Value: "Length" number of pairs of String Value for object key and Value
+  * Object keys are encoded as `[length][string]` without the Value Type Token
 
 As a convention, object Key-Value pairs are encoded in ascending order based on
 the key
 
-Before Bson V1 is finalized, I will consider removing the String token from
-Object keys. Object keys in JSON are always strings, so might not need the token
-
-Encoding for `{"a": null, "b": "bar"}`
+Encoding for `{"a": null, "b": "bb"}`
 ```
-001 00010                       // Object token and length(2)
-011 00001 01100001              // Object key "a"
-110                             // Value of "a": null
-011 00001 01100010              // Object key "b"
-011 00011 01100010 01100010     // Value of "b": "bb"
+001 00010                   // Object token and length(2)
+00001 01100001              // Object key "a"
+110                         // Value of "a": null
+00001 01100010              // Object key "b"
+011 00011 01100010 01100010 // Value of "b": "bb"
 ```
 
 #### Float
