@@ -463,31 +463,45 @@ diff: 2773
 
 ## We'll all float on, alright!
 
-TKTKTK
+Floats are interesting. Pretty incredible really. Best I can understand from
+what I read, a float basically stores two parts of an equation, and a signed bit.
 
-## Outline
+Way beyond me, so I'm not going to try and do anything more than store the bytes
+that Go unmarshals out of the JSON string.
 
-* Floats... There's a problem here
-* If a JSON file has the value 3.0, my current code will encode that as an int
-* If you then decode, the value will be 3
-* On top of that, the max value of a int64 is larger than a float64, because of
-fancy math reasons that I'm not going to read enough to understand
-* So while looking into this issue, I learned about json.RawMessage
-* If you Unmarshal json into a `map[string]json.RawMessage`, or into a
-`[]json.RawMessage`, then you get the string as it was found in the JSON.
-* Strings will be strings, numbers will be strings, arrays will be strings
-including everything contained (including whitespace/new lines)
+But how do I make sure that I'm dealing with a float and not an integer when all
+that Go gives me is a 64 bit float?
+
+And on top of that, apparently a 64 bit integer can store a much larger integer
+than a 64 bit float can. So how do I get Go to return me integers instead of
+floats when appropriate?
+
+That's what lead me to finding `json.RawMessage`.
+
+When you blindly unmarshal JSON in Go, you get the following types:
+
+| JSON Type | Go Type |
+| -- | -- |
+| boolean | bool |
+| numbers | float64 |
+| string | string |
+| array | []any |
+| object | map[string]any |
+| null | nil |
+
+But if you tell Go to unmarshal a JSON object into `map[string]json.RawMessage`,
+you get something different:
 
 ```go
 jsonBlob := []byte{`{"a":1, "b": "bb", "c": {"foo":   "bar"}, "d": [  1],"e":1.23}`}
 var d map[string]json.RawMessage
-_ = json.Unmarshal(jsonBlob, &d)
+json.Unmarshal(jsonBlob, &d)
 for key, v := range d {
     fmt.Printf("[%s]: %s\n", key, v)
 }
 ```
 
-Outputs:
+The output of that code is this:
 ```
 [a]: 1
 [b]: "bb"
@@ -496,15 +510,80 @@ Outputs:
 [e]: 1.23
 ```
 
-* Keeping the exact values is important to me
-* If I encode a json file into bson, then decode that bson, I should end up with
-the exact same JSON
-  * Note: The order of object keys will not be guaranteed, because maps
-* So I'm thinking now that I need to handle json Unmarshalling more closely
-* Time to refactor before moving on to floats
+Which means I can look at the start of each value to determine what type it is.
+As I found on a thread somewhere online:
 
-* Decided to keep floats as 64 bit
+* `{` means an object
+* `[` means array
+* `"` means a string
+* `t` means true
+* `f` means false
+* `n` means null
+* Everything else is a number
 
-* Wrote the spec
+Numbers in JSON are interesting:
 
-* The end
+* Integers: 10, -10, etc.
+* Floats: 0.1, 1.1, -1.1
+* Floats?: 1e5, -1E-3
+
+And with that in mind, if I don't find a period `.` or an `e` or `E`, then it's
+an integer! So I put together some functions to take the JSON unmarshalling one
+value at a time and was able to put Integer values into Integers and every other
+number into 64 bit floats.
+
+Finally, I generated a JSON file with floats in it, and the encoding and
+decoding worked!
+
+```
+$ cat jsons/array-objects-with-floats.json | bson check
+Json size: 6653
+Bson size: 4564
+diff: 2089
+```
+
+## Everything led up to this moment
+
+I had a goal: come up with a binary encoding of JSON and see if I can make the
+results fewer bytes than the source JSON.
+
+Not only did I succeed, but the savings were between 25% and 55% on the test
+files I used!
+
+And even better, I learned how to deal with binary, came up with a specification
+and wrote code that follows the specs.
+
+Now it was time to reward myself and move on to the next leg of my journey. I
+found that the PDF standard can be downloaded freely from the PDF Association!
+I was now ready for whatever binary encoding Adobe chose for PDF files.
+
+Let's take a quick look at some examples from the PDF 1.7 standard:
+
+```
+Integer objects
+123 43445 +17 -98 0
+
+Real objects
+34.5 -3.62 +123.6 4. -.002 0.0
+
+Strings
+(This is a string)
+
+Arrays
+[549 3.14 false (Ralph) /SomeName]
+
+Dictionaries
+<< /Type /Example
+    /Subtype /DictionaryExample
+    /Version 0.01
+    /IntegerItem 12
+    /StringItem (a string)
+    /Subdictionary <<   /Item1 0.4
+                        /Item2 true
+                        /LastItem (not!)
+                        /VeryLastItem (OK)
+                   >>
+>>
+```
+
+... Well, I guess PDF is a plain text standard...
