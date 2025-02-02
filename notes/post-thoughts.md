@@ -587,3 +587,32 @@ Dictionaries
 ```
 
 ... Well, I guess PDF is a plain text standard...
+
+## When the cows come home
+
+I finished writing this whole thing and decided to remove the 3 bit value type
+in front of object keys and see what happens.
+
+Here's the check on the largest JSON test file before the change:
+
+```
+$ cat jsons/array-objects-with-floats.json | bson check
+Json size: 6653
+Bson size: 4564
+diff: 2089
+```
+
+And here's the check after the update:
+```
+$ cat jsons/array-objects-with-floats.json | bson check
+Json size: 6653
+Bson size: 4512
+diff: 2141
+```
+
+So the change saved 52 bytes for that file, an extra 0.8% gained.
+
+Small as it is, it's still an improvement! And either way, it feels good to not
+include bits that aren't needed.
+
+I'll fix the tests later though.

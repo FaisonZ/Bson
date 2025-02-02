@@ -178,6 +178,12 @@ func encodeArrayChunk(a []any, bb *bit.BitBuilder) error {
 	return nil
 }
 
+func encodeObjectKey(s string, bb *bit.BitBuilder) error {
+	encodeStringChunks(s, bb)
+
+	return nil
+}
+
 func encodeObject(o map[string]any, bb *bit.BitBuilder) error {
 	writeToken(OBJECT_TOKEN, bb)
 
@@ -206,7 +212,7 @@ func encodeObjectChunk(
 	//fmt.Printf("Len: %d\n", len(strToWrite))
 	writeLength(byte(len(keysToWrite)), bb)
 	for _, key := range keysToWrite {
-		encodeString(key, bb)
+		encodeObjectKey(key, bb)
 		encodeValue(o[key], bb)
 	}
 

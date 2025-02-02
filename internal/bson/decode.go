@@ -100,7 +100,6 @@ func (d *Decoder) decodeObject() (map[string]any, error) {
 	o := make(map[string]any, l)
 
 	for i := 0; i < l; i++ {
-		d.br.GetBits(3)
 		key, _ := d.decodeString()
 		o[key], err = d.decodeValue()
 
