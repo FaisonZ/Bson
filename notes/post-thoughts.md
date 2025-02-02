@@ -76,7 +76,7 @@ And so I started brainstorming over a Binary encoding of JSON, known as Bson.
 ## Artisanal bit packing
 
 I hit the ground running and wrote notes that half covered the thoughts in my
-head ([view my brainstorming notes at your own risk](/notes/brainstorming.md)].
+head ([view my brainstorming notes at your own risk](/notes/brainstorming.md)).
 
 There were a lot of thoughts and I started thinking with bytes to encode types
 and lengths, but I realized quickly that whole bytes would probably make the
