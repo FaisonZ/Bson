@@ -615,4 +615,4 @@ So the change saved 52 bytes for that file, an extra 0.8% gained.
 Small as it is, it's still an improvement! And either way, it feels good to not
 include bits that aren't needed.
 
-The spec is updated now, but I'll fix the tests later.
+The spec is updated now and so are the tests.
