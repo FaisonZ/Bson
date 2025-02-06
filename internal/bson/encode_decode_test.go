@@ -2,7 +2,6 @@ package bson
 
 import (
 	"encoding/json"
-	"fmt"
 	"slices"
 	"testing"
 
@@ -25,14 +24,12 @@ func TestEncodeDecodeObject(t *testing.T) {
 		t.Errorf("Failed to encode JSON: %q", err)
 	}
 
-	fmt.Printf("Json size: %d\nBson size: %d\n", len(inJson), len(bb.Bytes))
-
 	decoded, err := Decode(bb.Bytes)
 	if err != nil {
 		t.Errorf("Failed to decode JSON: %q", err)
 	}
 
-	outJson, err := json.Marshal(decoded)
+	_, err = json.Marshal(decoded)
 	if err != nil {
 		t.Errorf("Failed to Marshal JSON: %q", err)
 	}
@@ -57,9 +54,6 @@ func TestEncodeDecodeObject(t *testing.T) {
 	}
 
 	// Need more work to fully test in and out maps
-
-	fmt.Printf("%s\n", inJson)
-	fmt.Printf("%s\n", outJson)
 }
 
 func TestEncodeDecodeArray(t *testing.T) {
@@ -78,14 +72,12 @@ func TestEncodeDecodeArray(t *testing.T) {
 		t.Errorf("Failed to encode JSON: %q", err)
 	}
 
-	fmt.Printf("Json size: %d\nBson size: %d\n", len(inJson), len(bb.Bytes))
-
 	decoded, err := Decode(bb.Bytes)
 	if err != nil {
 		t.Errorf("Failed to decode JSON: %q", err)
 	}
 
-	outJson, err := json.Marshal(decoded)
+	_, err = json.Marshal(decoded)
 	if err != nil {
 		t.Errorf("Failed to Marshal JSON: %q", err)
 	}
@@ -96,7 +88,4 @@ func TestEncodeDecodeArray(t *testing.T) {
 	if !slices.Equal(inArr, outArr) {
 		t.Errorf("In Array doesn't match out array")
 	}
-
-	fmt.Printf("%s\n", inJson)
-	fmt.Printf("%s\n", outJson)
 }
